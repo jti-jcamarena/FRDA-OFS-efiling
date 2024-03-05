@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="ecourt-sdk-FresnoeProsecutor-2024-03-05">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../../ecourt_sdk_fresnoda/ecourt-sdk-FresnoeProsecutor-2024-03-05.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
