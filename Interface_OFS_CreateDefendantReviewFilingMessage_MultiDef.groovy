@@ -39,21 +39,21 @@
  *  Screens = caseNumber=@{eventEntity.interfaceTracking.case}
  * -----------------------------------------------------------------------
  * OFS external variables:
- *  @input: _docStatus - Class:DocumentStatus
- *  @input: _ofsUniqueAttorneyId - Class:String - e8cacd46-ca46-411d-bbbe-b8a54ee432c4
- *  @input: _ofsUniqueAttorneyIdProduction f608c336-f9fb-46f1-a28b-0e8ed8da06aa
- *  @input: _ofsGenericStatuteCode - Class:String - court statute override
- *  @input: _eslOutboundFilingSmbPath - Class:String - \\\\torreypines\\OFS\\out\\processing
- *  @input: _ofsOutboundQueuedDirectory - Class:String \\\\torreypines\\OFS\\out\\queued
- *  @input: _submitAttorneyParticipant - Class:Boolean - true
- *  @input: _submitSSN - Class:Boolean - false
- *  @input: _formatSSN - Class:Boolean - false
- *  @input: _fileToStaging - Class:Boolean - false
- *  @input: _submitPersonSexCode - Class:Boolean - false
- *  @input: _submitCaseCrossReference - Class:Boolean - true
- *  @input: _submitRace - Class:Boolean - false
- *  @input: _submitStaticAttorney - Class:Boolean - true
- *	@output _eResult - Class:String (CtInterfaceTracking.result)
+ * @input: _docStatus - Class:DocumentStatus
+ * @input: _ofsUniqueAttorneyId - Class:String - e8cacd46-ca46-411d-bbbe-b8a54ee432c4
+ * @input: _ofsUniqueAttorneyIdProduction f608c336-f9fb-46f1-a28b-0e8ed8da06aa
+ * @input: _ofsGenericStatuteCode - Class:String - court statute override
+ * @input: _eslOutboundFilingSmbPath - Class:String - \\\\torreypines\\OFS\\out\\processing
+ * @input: _ofsOutboundQueuedDirectory - Class:String \\\\torreypines\\OFS\\out\\queued
+ * @input: _submitAttorneyParticipant - Class:Boolean - true
+ * @input: _submitSSN - Class:Boolean - false
+ * @input: _formatSSN - Class:Boolean - false
+ * @input: _fileToStaging - Class:Boolean - false
+ * @input: _submitPersonSexCode - Class:Boolean - false
+ * @input: _submitCaseCrossReference - Class:Boolean - true
+ * @input: _submitRace - Class:Boolean - false
+ * @input: _submitStaticAttorney - Class:Boolean - true
+ * @output _eResult - Class:String (CtInterfaceTracking.result)
  */
 import org.apache.commons.lang3.StringUtils;
 import com.hazelcast.util.StringUtil;
@@ -107,15 +107,15 @@ if( cCase ) {
 /** ------------------------------------------------------------------------------------
  * Interface execution begins here
  */
-try{
+try {
     _recordedUsername = _username;
-}catch(Exception ex){
+} catch (Exception ex) {
     _recordedUsername = "exception recording";
 }
 
 HashSet filingParties = new HashSet();
 filingParties.addAll(_docStatus.document.collect("xrefs[refType == 'DOCREL' && entityType=='SubCase'].ref[!parties.isEmpty()].parties[partyType == 'DEF' && status == 'ACT']"));
-if (filingParties.isEmpty()){
+if (filingParties.isEmpty()) {
     filingParties.add(_docStatus.document.case.collect("parties[partyType == 'DEF' && status == 'ACT']").orderBy("id").first());
 }
 
@@ -124,7 +124,7 @@ for (filingParty in filingParties){
 	new CreateDefPtyReviewFilingInterface(this).exec(filingParty);
 }
 */
-new CreateDefPtyReviewFilingInterface(this).exec(filingParties.find({it -> it.id != null}));
+new CreateDefPtyReviewFilingInterface(this).exec(filingParties.find({ it -> it.id != null }));
 
 /** ------------------------------------------------------------------------------------
  * Interface Tracking class
@@ -133,7 +133,7 @@ class MyInterfaceTracking {
     CtInterfaceTracking tracking_;
 
     static final String INTERFACE_ = "Interface_OFS_CreateDefendantReviewFilingMessage";
-    static final String INTERFACE_TYPE_ = "OFS_RVWFILE_SUB";		// Process review filing messages
+    static final String INTERFACE_TYPE_ = "OFS_RVWFILE_SUB";        // Process review filing messages
 
     // Tracking error result codes [CL_INTERFACE_RESULT]
     static final String RESULT_START_ = "START";
@@ -170,7 +170,7 @@ class MyInterfaceTracking {
         tracking_.saveOrUpdate();
     }
 
-    void addTrackingDetail(String type, String status, String desc, String memo="", String contents="") {
+    void addTrackingDetail(String type, String status, String desc, String memo = "", String contents = "") {
         CtInterfaceTrackingDetail detail = new CtInterfaceTrackingDetail();
         detail.setInterfaceTracking(tracking_);
         detail.setType(type);
@@ -181,13 +181,13 @@ class MyInterfaceTracking {
         detail.saveOrUpdate();
     }
 
-    void addBatchDetailStatus(String status, String value, String memo="") {
+    void addBatchDetailStatus(String status, String value, String memo = "") {
         CtInterfaceBatchItemDetail batchDetail = new CtInterfaceBatchItemDetail();
         batchDetail.setInterfaceTracking(tracking_);
         batchDetail.setStatusDate(new Date());
         batchDetail.setStatus(status);  // [CL_BATCH_METRICS]
         batchDetail.setValue(value);
-        if( memo != null )
+        if (memo != null)
             batchDetail.setMemo(memo);
         batchDetail.saveOrUpdate();
     }
@@ -211,38 +211,38 @@ class MyInterfaceTracking {
         return null;
     }
 
-    String setCaseNumber(String caseNum, Case cCase=null) {
+    String setCaseNumber(String caseNum, Case cCase = null) {
         tracking_.setCaseNumber(caseNum);
-        if( cCase != null)
+        if (cCase != null)
             tracking_.setCase(cCase);
         tracking_.saveOrUpdate();
         return caseNum;
     }
 
     void setParty(Party cParty_) {
-        if( cParty_ != null )
+        if (cParty_ != null)
             tracking_.setParty(cParty_)
         tracking_.saveOrUpdate();
     }
 
     String setMemo(String memo) {
-        if( !StringUtil.isNullOrEmpty(memo) )
+        if (!StringUtil.isNullOrEmpty(memo))
             tracking_.setMemo(memo);
         tracking_.saveOrUpdate();
         return memo;
     }
 
-    String setException(String exception, String memo="") {
+    String setException(String exception, String memo = "") {
         tracking_.setException(exception);
-        if( !StringUtil.isNullOrEmpty(memo) )
+        if (!StringUtil.isNullOrEmpty(memo))
             tracking_.setMemo(memo);
         tracking_.saveOrUpdate();
         return memo + " - " + exception;
     }
 
-    String updateResult(String result, String memo="") {
+    String updateResult(String result, String memo = "") {
         tracking_.setResult(result); // [CL_INTERFACE_RESULT]
-        if( !StringUtil.isNullOrEmpty(memo) )
+        if (!StringUtil.isNullOrEmpty(memo))
             tracking_.setMemo(memo);
         tracking_.saveOrUpdate();
         return result;
@@ -258,15 +258,15 @@ class MyInterfaceTracking {
  * Odyssey review filing interface class
  */
 public class CreateDefPtyReviewFilingInterface {
-    public Boolean bDebug_ = true; 			   // debug flag used for script trace reporting
+    public Boolean bDebug_ = true;               // debug flag used for script trace reporting
     public Script cRule_;                      // pointer to business rule for logger output
     public Party cParty_;                      // inbound document case to file
     public Date dExecDate_ = new Date();       // get current date
-    public List aErrorList_ = [];        	   // validation error list
-    public Boolean bReviewFilingSent_= false;  // flag to track filing condition
+    public List aErrorList_ = [];               // validation error list
+    public Boolean bReviewFilingSent_ = false;  // flag to track filing condition
 
     // Odyssey definitions
-    static final String OFS_ATTRIBUTE_TYPE_= "IOFS";	// lookupList attribute type
+    static final String OFS_ATTRIBUTE_TYPE_ = "IOFS";    // lookupList attribute type
 
     // System Property attribute class
     class MySysProperties {
@@ -279,11 +279,11 @@ public class CreateDefPtyReviewFilingInterface {
 
     // OFS document status map
     Map mDocStatus_ = [
-            'ofsSubmit' : 'OFSSUB',
-            'ofsRecv'   : 'OFSREC',
-            'ofsFiled'  : 'OFSFILED',
-            'ofsReject' : 'OFSREJ',
-            'ofsFailed' : 'OFSFAILED'
+            'ofsSubmit': 'OFSSUB',
+            'ofsRecv'  : 'OFSREC',
+            'ofsFiled' : 'OFSFILED',
+            'ofsReject': 'OFSREJ',
+            'ofsFailed': 'OFSFAILED'
     ];
 
     // ePros custom configuration class
@@ -319,10 +319,11 @@ public class CreateDefPtyReviewFilingInterface {
             iTracking_ = new MyInterfaceTracking(dExecDate_);
 
             // Get system assignments and submit filing if valid document status
-            if ( assignSystemProperties() != null ) { // valid?
+            if (assignSystemProperties() != null) { // valid?
 
                 logger "Searching for DEF party w/ ${mDocStatus_.ofsSubmit} status and document.id(${cRule_?._docStatus?.document?.id})";
-                if (cRule_?._docStatus != null && cRule_._docStatus.statusType == mDocStatus_.ofsSubmit) { // valid OFSSUB status?
+                if (cRule_?._docStatus != null && cRule_._docStatus.statusType == mDocStatus_.ofsSubmit) {
+                    // valid OFSSUB status?
                     cRule_?._docStatus.beginDate = Timestamp.valueOf(LocalDateTime.now());
                     cRule_?._docStatus.sourceCaseNumber = "${filingParty.fullName}";
 
@@ -355,7 +356,7 @@ public class CreateDefPtyReviewFilingInterface {
         }
 
         // Load interface result response
-        cRule_._eResult= iTracking_.tracking_.result;
+        cRule_._eResult = iTracking_.tracking_.result;
     }
 
     /** -------------------------------------------------------------------------------------------------------
@@ -369,7 +370,7 @@ public class CreateDefPtyReviewFilingInterface {
             cSysProps_.sSmbFileUsername_ = SystemProperty.getValue("interface.portal.account.username");
             cSysProps_.sSmbFilePassword_ = SystemProperty.getValue("interface.portal.account.password");
             cSysProps_.sEmailList_ = SystemProperty.getValue("interface.odyssey.emailCsvList");
-        } catch ( Exception ex ){
+        } catch (Exception ex) {
             logger iTracking_.setException(ex.message, "Exception::assignSystemProperties - system property error");
             iTracking_.updateResult(iTracking_.RESULT_FAIL_EXCEPTION_);
             return false;
@@ -382,14 +383,14 @@ public class CreateDefPtyReviewFilingInterface {
      * @param cCase - Party case
      * @return (0= Failure, 1= Successful)
      */
-    public boolean createCriminalDefPtyCourtFilingMessage( Case cCase ) {
+    public boolean createCriminalDefPtyCourtFilingMessage(Case cCase) {
 
         User filingUser = User.get(cRule_._username);
         DirPerson filingDirPerson = filingUser?.dirPerson;
-        DirAttribute filingPassword = filingDirPerson?.collect("attributes[attributeType == 'EFSPPASS' && effectiveTo == null]")?.find({it -> it.value != null && !it.value.isEmpty()});
+        DirAttribute filingPassword = filingDirPerson?.collect("attributes[attributeType == 'EFSPPASS' && effectiveTo == null]")?.find({ it -> it.value != null && !it.value.isEmpty() });
 
-        DirPerson defaultFiler = DomainObject.find(DirPerson.class, "firstName", "District", "lastName", "Attorney").find({it -> it != null});
-        DirAttribute defaultPassword = defaultFiler.collect("attributes[attributeType == 'EFSPPASS' && value != null]").find({it -> it != null && it.value != null});
+        DirPerson defaultFiler = DomainObject.find(DirPerson.class, "firstName", "District", "lastName", "Attorney").find({ it -> it != null });
+        DirAttribute defaultPassword = defaultFiler.collect("attributes[attributeType == 'EFSPPASS' && value != null]").find({ it -> it != null && it.value != null });
         logger("TEST:387:filingDirPerson: ${filingDirPerson?.firstName} ${filingDirPerson?.lastName} ${filingPassword?.value}");
         logger("TEST:387:DefaultFiler: ${defaultFiler?.firstName} ${defaultFiler?.lastName} ${defaultPassword?.value}");
 
@@ -401,14 +402,14 @@ public class CreateDefPtyReviewFilingInterface {
         String defaultFilingUserEmail = StringUtil.isNullOrEmpty(defaultFiler?.email) ? "" : defaultFiler?.email;
         String defaultFilingUserPassword = StringUtil.isNullOrEmpty(defaultPassword?.value) ? "" : defaultPassword?.value;
 
-        if (StringUtil.isNullOrEmpty(filingDirPerson?.email) || StringUtil.isNullOrEmpty(filingPassword?.value) || StringUtil.isNullOrEmpty(filingDirPerson?.firstName) || StringUtil.isNullOrEmpty(filingDirPerson?.lastName)){
+        if (StringUtil.isNullOrEmpty(filingDirPerson?.email) || StringUtil.isNullOrEmpty(filingPassword?.value) || StringUtil.isNullOrEmpty(filingDirPerson?.firstName) || StringUtil.isNullOrEmpty(filingDirPerson?.lastName)) {
             filingUserEmail = defaultFiler?.email;
             filingUserPassword = defaultPassword?.value;
             filingUserFirstName = defaultFiler?.firstName;
             filingUserLastName = defaultFiler?.lastName;
         }
 
-        boolean bRetVal= false;  // guilty until proven innocent
+        boolean bRetVal = false;  // guilty until proven innocent
         String tylerCourtLocation = "fresno:cr";
         String sVal;
         Where cWhere;
@@ -420,18 +421,18 @@ public class CreateDefPtyReviewFilingInterface {
         String sPrimaryDocCode = getLookupListCodeAttribute("ODYSSEY_BINARY_CATEGORY_TEXT", "PRIMARY", OFS_ATTRIBUTE_TYPE_, tylerCourtLocation, tylerCaseCategory, "filingCode", "US");
         String sConnectingDocCode = getLookupListCodeAttribute("ODYSSEY_BINARY_CATEGORY_TEXT", "PRIMARY", OFS_ATTRIBUTE_TYPE_, tylerCourtLocation, tylerCaseCategory, "filingCode", "US");
         String sPhaseTypeText = getLookupListCodeAttribute("ODYSSEY_PHASE_TYPE_TEXT", "CASEFILING", OFS_ATTRIBUTE_TYPE_, tylerCourtLocation, tylerCaseCategory, "filingCode", "US");
-        String sDefaultDLIssuerState= getLookupListCodeAttribute("US_STATE", "CA", OFS_ATTRIBUTE_TYPE_, tylerCourtLocation, tylerCaseCategory, "filingCode", "US");
+        String sDefaultDLIssuerState = getLookupListCodeAttribute("US_STATE", "CA", OFS_ATTRIBUTE_TYPE_, tylerCourtLocation, tylerCaseCategory, "filingCode", "US");
         String crossReferenceDistrictAttorney = getLookupListCodeAttribute("ODYSSEY_IDENTIFICATION_SOURCE_TEXT", "DA", OFS_ATTRIBUTE_TYPE_, tylerCourtLocation, tylerCaseCategory, "filingCode", "US");
         String crossReferenceBooking = getLookupListCodeAttribute("ODYSSEY_IDENTIFICATION_SOURCE_TEXT", "BK", OFS_ATTRIBUTE_TYPE_, tylerCourtLocation, tylerCaseCategory, "filingCode", "US");
         String crossReferenceCII = getLookupListCodeAttribute("ODYSSEY_IDENTIFICATION_SOURCE_TEXT", "CII", OFS_ATTRIBUTE_TYPE_, tylerCourtLocation, tylerCaseCategory, "filingCode", "US");
         logger("434: sPrimaryDocCode:${sPrimaryDocCode};sConnectingDocCode:${sConnectingDocCode};sPhaseTypeText:${sPhaseTypeText};sDefaultDLIssuerState:${sDefaultDLIssuerState};crossReferenceDistrictAttorney:${crossReferenceDistrictAttorney};crossReferenceBooking:${crossReferenceBooking};crossReferenceCII:${crossReferenceCII}");
 
         // OFS ePros configuration
-        List<ChargeStatuteObj> aMissingOfsStatuteList = [];	// list to track missing ofs charge statutes
+        List<ChargeStatuteObj> aMissingOfsStatuteList = [];    // list to track missing ofs charge statutes
         String sCaseDocketNbr = null;
 
         // Create object for specific ePros configuration parameters
-        this.eProsCfg_= new EProsCfg();
+        this.eProsCfg_ = new EProsCfg();
 
         try {
             // Test for valid defendant party
@@ -448,15 +449,15 @@ public class CreateDefPtyReviewFilingInterface {
             logger("TEST:426:partyTitle:${cParty_.title}: partySubCaseTitle:${cParty_.subCase.title}");
             OtherCaseNumber cOldCaseFilingNFY = cCase.collect("otherCaseNumbers[endDate == null && type=='NYF' && number != null && !number.isEmpty() && subCase == #p1]", cParty_.subCase).orderBy("lastUpdated").last();
             logger("TEST:NYF1:${cOldCaseFilingNFY}");
-            cOldCaseFilingNFY = cOldCaseFilingNFY == null ? cCase.collect("otherCaseNumbers[endDate == null && type=='NYF' && number != null && !number.isEmpty() && ((memo != null && memo.contains(#p1) && memo.contains(#p2)))]", "${cParty_.firstName}".toString(),  "${cParty_.lastName}".toString()).orderBy("lastUpdated").last() : cOldCaseFilingNFY;
+            cOldCaseFilingNFY = cOldCaseFilingNFY == null ? cCase.collect("otherCaseNumbers[endDate == null && type=='NYF' && number != null && !number.isEmpty() && ((memo != null && memo.contains(#p1) && memo.contains(#p2)))]", "${cParty_.firstName}".toString(), "${cParty_.lastName}".toString()).orderBy("lastUpdated").last() : cOldCaseFilingNFY;
             logger("TEST:NYF2:${cOldCaseFilingNFY}");
-            if (cParty_.lastName.contains(" ")){
-                cOldCaseFilingNFY = cOldCaseFilingNFY == null ? cCase.collect("otherCaseNumbers[endDate == null && type=='NYF' && number != null && !number.isEmpty() && ((memo != null && memo.contains(#p1) && memo.contains(#p2)))]", "${cParty_.firstName}".toString(),  "${cParty_.lastName.substring(0, cParty_.lastName.indexOf(" "))}".toString()).orderBy("lastUpdated").last() : cOldCaseFilingNFY;
+            if (cParty_.lastName.contains(" ")) {
+                cOldCaseFilingNFY = cOldCaseFilingNFY == null ? cCase.collect("otherCaseNumbers[endDate == null && type=='NYF' && number != null && !number.isEmpty() && ((memo != null && memo.contains(#p1) && memo.contains(#p2)))]", "${cParty_.firstName}".toString(), "${cParty_.lastName.substring(0, cParty_.lastName.indexOf(" "))}".toString()).orderBy("lastUpdated").last() : cOldCaseFilingNFY;
                 logger("TEST:NYF3:${cOldCaseFilingNFY}");
             }
-            OtherCaseNumber cOldCaseFiling = cCase.collect("otherCaseNumbers[endDate == null && type=='CRT' && (updateReason == null || updateReason != 'CRTComment') && number != null && !number.isEmpty() && memo != null && memo.contains(#p1) && (memo.contains(#p2) || memo.contains(#p3))]", cParty_.firstName,  cParty_.lastName, cParty_.lastName?.replaceAll("\\W","")).orderBy("lastUpdated").last();
+            OtherCaseNumber cOldCaseFiling = cCase.collect("otherCaseNumbers[endDate == null && type=='CRT' && (updateReason == null || updateReason != 'CRTComment') && number != null && !number.isEmpty() && memo != null && memo.contains(#p1) && (memo.contains(#p2) || memo.contains(#p3))]", cParty_.firstName, cParty_.lastName, cParty_.lastName?.replaceAll("\\W", "")).orderBy("lastUpdated").last();
 
-            cOldCaseFiling = cOldCaseFiling == null ? DomainObject.find(OtherCaseNumber.class, "case", cCase, "type", "CRT")?.find({it -> it.endDate == null && StringUtils.containsAny(it.memo, cParty_.lastName?.replaceAll("\\W","")) && StringUtils.containsAny(it.memo, cParty_.firstName?.replaceAll("\\W","")) && it.number != null}) : cOldCaseFiling;
+            cOldCaseFiling = cOldCaseFiling == null ? DomainObject.find(OtherCaseNumber.class, "case", cCase, "type", "CRT")?.find({ it -> it.endDate == null && StringUtils.containsAny(it.memo, cParty_.lastName?.replaceAll("\\W", "")) && StringUtils.containsAny(it.memo, cParty_.firstName?.replaceAll("\\W", "")) && it.number != null }) : cOldCaseFiling;
 
             cOldCaseFiling = cOldCaseFiling == null ? cCase.collect("otherCaseNumbers[endDate == null && type=='CRT' && number != null && !number.isEmpty() && subCase == #p1]", cParty_.subCase).orderBy("lastUpdated").last() : cOldCaseFiling;
 
@@ -487,7 +488,7 @@ public class CreateDefPtyReviewFilingInterface {
 
            logger("condition ${cOldCaseFilingNFY != null && cOldCaseFiling == null}")
            */
-            if (cOldCaseFilingNFY != null && cOldCaseFiling == null){
+            if (cOldCaseFilingNFY != null && cOldCaseFiling == null) {
                 cOldCaseFiling = cOldCaseFilingNFY;
             }
 
@@ -497,7 +498,7 @@ public class CreateDefPtyReviewFilingInterface {
 
             eProsCfg_.sCaseNumber_ = cOldCaseFiling?.number;
             logger("435:eProsCfg_.sCaseNumber_:${eProsCfg_.sCaseNumber_};cOldCaseFiling:${cOldCaseFiling?.number}");
-            eProsCfg_.sCaseCourtLocation_ =  tylerCourtLocation;
+            eProsCfg_.sCaseCourtLocation_ = tylerCourtLocation;
             // Initialize document statuses to check for valid 'OFSSUB' status and cleanup older statuses
             if (!initializeDocumentStatus(cParty_)) { // invalid 'OFSSUB' document?
                 this.aErrorList_.add(new ValidationError(true, cCase.caseNumber, logger("No DEF documents found w/ ${mDocStatus_.ofsSubmit} status set, reviewFiling aborted")));
@@ -523,7 +524,7 @@ public class CreateDefPtyReviewFilingInterface {
                     + 'xmlns:criminal="urn:oasis:names:tc:legalxml-courtfiling:schema:xsd:CriminalCase-4.0">');
 
             // Get/Report Case cross reference number
-            if(cRule_._submitCaseCrossReference == true && crossReferenceDistrictAttorney != null && cOldCaseFiling == null){
+            if (cRule_._submitCaseCrossReference == true && crossReferenceDistrictAttorney != null && cOldCaseFiling == null) {
                 OFS_CaseXml.append('<nc:DocumentIdentification>');
                 OFS_CaseXml.append("<nc:IdentificationID>${cCase.caseNumber}${cCase.caseTeamCode}</nc:IdentificationID>");
                 OFS_CaseXml.append('<nc:IdentificationCategoryText>CaseCrossReferenceNumber</nc:IdentificationCategoryText>');
@@ -609,8 +610,9 @@ public class CreateDefPtyReviewFilingInterface {
                 if (StringUtil.isNullOrEmpty(cOldCaseFiling?.cf_OFSCaseTrackingID)) {  // invalid caseDocketID?
                     logger("Court cf_OFSCaseTrackingID not found, adding CaseDocketNbr to eProCfg for eslService to query from OFS");
                     if (!StringUtil.isNullOrEmpty(cOldCaseFiling?.number)) {  // must have valid caseDocketID?
-                        sCaseDocketNbr= cOldCaseFiling.number;     // assign docket number to use for esl_service trackingID OFS query
-                    }else{
+                        sCaseDocketNbr = cOldCaseFiling.number;
+                        // assign docket number to use for esl_service trackingID OFS query
+                    } else {
                         this.aErrorList_.add(new ValidationError(true, cCase.caseNumber, logger("OtherCaseNumber 'CRT' type found with no caseDocketNumber assigned, rejected")));
                         return false;
                     }
@@ -632,10 +634,10 @@ public class CreateDefPtyReviewFilingInterface {
             //cOldCaseFiling = cCase.collect("otherCaseNumbers[type=='CRT' && memo != null && memo.contains(#p1) && memo.contains(#p2)]", "${cParty_.firstName}".toString(),  "${cParty_.lastName}".toString()).orderBy("lastUpdated").last();
             //cOldCaseFiling = cOldCaseFiling == null || cOldCaseFiling.number == null ? cCase.collect("otherCaseNumbers[type=='CRT' && number != null]").orderBy("lastUpdated").last() : cOldCaseFiling;
             logger("542:cOldCaseFiling:${cOldCaseFiling}");
-            if(cOldCaseFiling == null){
+            if (cOldCaseFiling == null) {
                 // Add case assignment role for attorney
                 String sAttorneyRef = "ATTY";
-                if (cRule_._submitAttorneyParticipant == true){
+                if (cRule_._submitAttorneyParticipant == true) {
                     OFS_CaseXml.append('<ecf:CaseOtherEntityAttorney>');
                     OFS_CaseXml.append("<nc:RoleOfPersonReference s:ref=\"${xmlStrUtil(sAttorneyRef, "Attorney1")}\"/>");
                     OFS_CaseXml.append('<j:CaseOfficialRoleText>LEAD</j:CaseOfficialRoleText>');
@@ -649,11 +651,11 @@ public class CreateDefPtyReviewFilingInterface {
                     //logger("Assigning default staging ofs attorneyID(${cRule_._ofsUniqueAttorneyId})");
                     logger("Assigning default production ofs attorneyID(${cRule_._ofsUniqueAttorneyIdProduction})");
                     OFS_CaseXml.append('<nc:PersonOtherIdentification>');
-                    if (cRule_._submitStaticAttorney == true && cRule_._fileToStaging == true){
+                    if (cRule_._submitStaticAttorney == true && cRule_._fileToStaging == true) {
                         OFS_CaseXml.append("<nc:IdentificationID>${xmlStrUtil(cRule_._ofsUniqueAttorneyId)}</nc:IdentificationID>");
-                    } else if (cRule_._submitStaticAttorney == true && cRule_._fileToStaging == false){
+                    } else if (cRule_._submitStaticAttorney == true && cRule_._fileToStaging == false) {
                         OFS_CaseXml.append("<nc:IdentificationID>${xmlStrUtil(cRule_._ofsUniqueAttorneyIdProduction)}</nc:IdentificationID>");
-                    } else{
+                    } else {
                         OFS_CaseXml.append("<nc:IdentificationID></nc:IdentificationID>");
                     }
                     OFS_CaseXml.append("<nc:IdentificationCategoryText>ATTORNEYID</nc:IdentificationCategoryText>");
@@ -670,7 +672,7 @@ public class CreateDefPtyReviewFilingInterface {
 
                 // Add party/person/profile information
                 PersonProfile cProfile = cParty_.collect("person.profiles").last();
-                if( cProfile?.dateOfBirth != null ) {
+                if (cProfile?.dateOfBirth != null) {
                     sVal = convDateFmtToStr(cProfile?.dateOfBirth, "yyyy-MM-dd");
                     logger("Adding DOB(${xmlStrUtil(sVal)})");
                     OFS_CaseXml.append('<nc:PersonBirthDate>');
@@ -678,27 +680,27 @@ public class CreateDefPtyReviewFilingInterface {
                     OFS_CaseXml.append('</nc:PersonBirthDate>');
                 }
 
-                if( !StringUtil.isNullOrEmpty((String)cProfile?.citizenship) ) {
+                if (!StringUtil.isNullOrEmpty((String) cProfile?.citizenship)) {
                     logger("Adding citizenship(${xmlStrUtil(cProfile?.citizenship)})");
                     OFS_CaseXml.append("<nc:PersonCitizenshipFIPS10-4Code>${xmlStrUtil(getLookupListCodeAttribute("COUNTRY", cProfile?.citizenship, OFS_ATTRIBUTE_TYPE_, tylerCourtLocation, tylerCaseCategory, "filingCode", "US"))}</nc:PersonCitizenshipFIPS10-4Code>");
                 }
 
-                if( !StringUtil.isNullOrEmpty((String)cProfile?.ethnicity) ) {
+                if (!StringUtil.isNullOrEmpty((String) cProfile?.ethnicity)) {
                     logger("Adding ethnicity(${xmlStrUtil(cProfile?.ethnicity)})");
                     OFS_CaseXml.append("<nc:PersonEthnicityText>${xmlStrUtil(getLookupListCodeAttribute("ETHNICITY", cProfile?.ethnicity, OFS_ATTRIBUTE_TYPE_, tylerCourtLocation, tylerCaseCategory, "filingCode", "US"))}</nc:PersonEthnicityText>");
                 }
 
-                if( !StringUtil.isNullOrEmpty((String)cProfile?.eyeColor) ) {
+                if (!StringUtil.isNullOrEmpty((String) cProfile?.eyeColor)) {
                     logger("Adding eyeColor(${xmlStrUtil(cProfile?.eyeColor)})");
                     OFS_CaseXml.append("<nc:PersonEyeColorCode>${xmlStrUtil(getLookupListCodeAttribute("EYE_COLOR", cProfile?.eyeColor, OFS_ATTRIBUTE_TYPE_, tylerCourtLocation, tylerCaseCategory, "filingCode", "US"))}</nc:PersonEyeColorCode>");
                 }
 
-                if( !StringUtil.isNullOrEmpty((String)cProfile?.hairColor) ) {
+                if (!StringUtil.isNullOrEmpty((String) cProfile?.hairColor)) {
                     logger("Adding hairColor(${xmlStrUtil(cProfile?.hairColor)})");
                     OFS_CaseXml.append("<nc:PersonHairColorCode>${xmlStrUtil(getLookupListCodeAttribute("HAIR_COLOR", cProfile?.hairColor, OFS_ATTRIBUTE_TYPE_, tylerCourtLocation, tylerCaseCategory, "filingCode", "US"))}</nc:PersonHairColorCode>");
                 }
 
-                if( !StringUtil.isNullOrEmpty((String)cProfile?.height) ) {
+                if (!StringUtil.isNullOrEmpty((String) cProfile?.height)) {
                     OFS_CaseXml.append('<nc:PersonHeightMeasure>');
                     sVal = convertFtInFmtToInches(cProfile?.height);
                     OFS_CaseXml.append("<nc:MeasureText>${xmlStrUtil(sVal)}</nc:MeasureText>");
@@ -706,7 +708,7 @@ public class CreateDefPtyReviewFilingInterface {
                     OFS_CaseXml.append('</nc:PersonHeightMeasure>');
                 }
 
-                if( cProfile != null && cProfile?.primaryLanguage == 'ENGL' )
+                if (cProfile != null && cProfile?.primaryLanguage == 'ENGL')
                     OFS_CaseXml.append("<nc:PersonLanguageEnglishIndicator>${((cProfile?.primaryLanguage == 'ENGL') ? 'true' : 'false')}</nc:PersonLanguageEnglishIndicator>");
 
                 logger("Adding DEF name - ${xmlStrUtil(cParty_.person?.lastName)}, ${xmlStrUtil(cParty_.person?.middleName)} ${xmlStrUtil(cParty_.person?.firstName)} ${xmlStrUtil(cParty_.person?.nameSuffix)}");
@@ -719,10 +721,11 @@ public class CreateDefPtyReviewFilingInterface {
 
                 // Add SSN identification
                 Identification cSSNId = cParty_.collect("person.identifications[identificationType=='SSN' and (effectiveTo == null or #p1 < effectiveTo) and (effectiveFrom == null or #p2 > effectiveFrom) and (status == null or status == 'VAL')]", new Date(), new Date()).last();
-                if (cRule_._submitSSN == true){
-                    if (cSSNId != null && cSSNId.identificationNumber != null && !cSSNId.identificationNumber.isEmpty() && cSSNId?.identificationNumber.trim().replaceAll("\\D","").length() == 9) { // valid?
-                        String ssn = cSSNId?.identificationNumber.trim().replaceAll("\\D","");
-                        ssn = cRule_._formatSSN == true ? "${ssn.substring(0,3)}-${ssn.substring(3,5)}-${ssn.substring(5)}" : ssn;
+                if (cRule_._submitSSN == true) {
+                    if (cSSNId != null && cSSNId.identificationNumber != null && !cSSNId.identificationNumber.isEmpty() && cSSNId?.identificationNumber.trim().replaceAll("\\D", "").length() == 9) {
+                        // valid?
+                        String ssn = cSSNId?.identificationNumber.trim().replaceAll("\\D", "");
+                        ssn = cRule_._formatSSN == true ? "${ssn.substring(0, 3)}-${ssn.substring(3, 5)}-${ssn.substring(5)}" : ssn;
                         logger("Adding SSN# - ${ssn}");
                         OFS_CaseXml.append('<nc:PersonOtherIdentification>');
                         OFS_CaseXml.append("<nc:IdentificationID>${xmlStrUtil(ssn)}</nc:IdentificationID>");
@@ -757,16 +760,16 @@ public class CreateDefPtyReviewFilingInterface {
                 // Add person profile information
                 logger("Race(${xmlStrUtil(cProfile?.race)}) / Gender(${xmlStrUtil(cProfile?.gender)}) / Weight(${xmlStrUtil(cProfile?.weight?.toString())})");
 
-                if(cRule_._submitRace == true && !StringUtil.isNullOrEmpty((String)cProfile?.race) ){
+                if (cRule_._submitRace == true && !StringUtil.isNullOrEmpty((String) cProfile?.race)) {
                     OFS_CaseXml.append("<nc:PersonRaceText>${xmlStrUtil(getLookupListCodeAttribute("RACE", cProfile?.race, OFS_ATTRIBUTE_TYPE_, tylerCourtLocation, tylerCaseCategory, "filingCode", "US"))}</nc:PersonRaceText>");
                 }
                 //OFS_CaseXml.append("<nc:PersonRaceText>W</nc:PersonRaceText>");
 
-                if(cRule_._submitPersonSexCode == true && !StringUtil.isNullOrEmpty((String)cProfile?.gender) ){
+                if (cRule_._submitPersonSexCode == true && !StringUtil.isNullOrEmpty((String) cProfile?.gender)) {
                     OFS_CaseXml.append("<nc:PersonSexCode>${xmlStrUtil(getLookupListCodeAttribute("GENDER", cProfile?.gender, OFS_ATTRIBUTE_TYPE_, tylerCourtLocation, tylerCaseCategory, "filingCode", "US"))}</nc:PersonSexCode>");
                 }
 
-                if( !StringUtil.isNullOrEmpty((String)cProfile?.weight?.toString()) ) {
+                if (!StringUtil.isNullOrEmpty((String) cProfile?.weight?.toString())) {
                     OFS_CaseXml.append('<nc:PersonWeightMeasure>');
                     OFS_CaseXml.append("<nc:MeasureText>${xmlStrUtil(cProfile?.weight?.toString())}</nc:MeasureText>");
                     OFS_CaseXml.append('<nc:WeightUnitCode>LBR</nc:WeightUnitCode>');
@@ -779,12 +782,12 @@ public class CreateDefPtyReviewFilingInterface {
                 Identification cDLId = cParty_.collect("person.identifications[identificationType=='CDL' and (effectiveTo == null or #p1 < effectiveTo) and (effectiveFrom == null or #p2 > effectiveFrom) and (status == null or status == 'VAL')]", new Date(), new Date()).last();
                 if (cDLId != null) {
                     logger("Adding DL(${cDLId?.identificationNumber})/Type(${cDLId?.identificationType})/State(" +
-                            StringUtil.isNullOrEmpty(cDLId?.issuerState)? sDefaultDLIssuerState: cDLId?.issuerState + ")");
+                            StringUtil.isNullOrEmpty(cDLId?.issuerState) ? sDefaultDLIssuerState : cDLId?.issuerState + ")");
                     OFS_CaseXml.append('<ecf:PersonDriverLicense>');
                     OFS_CaseXml.append('<nc:DriverLicenseIdentification>');
                     OFS_CaseXml.append("<nc:IdentificationID>${xmlStrUtil(cDLId?.identificationNumber)}</nc:IdentificationID>");
                     OFS_CaseXml.append("<nc:IdentificationCategoryText>${xmlStrUtil(getLookupListCodeAttribute("IDENTIFICATION_TYPE", cDLId?.identificationType, OFS_ATTRIBUTE_TYPE_, tylerCourtLocation, tylerCaseCategory, "filingCode", "US"))}</nc:IdentificationCategoryText>");
-                    OFS_CaseXml.append("<j:DrivingJurisdictionAuthorityNCICLSTACode>${xmlStrUtil(StringUtil.isNullOrEmpty(cDLId?.issuerState) || cDLId?.issuerState.length() != 2 ? sDefaultDLIssuerState: cDLId?.issuerState)}</j:DrivingJurisdictionAuthorityNCICLSTACode>");
+                    OFS_CaseXml.append("<j:DrivingJurisdictionAuthorityNCICLSTACode>${xmlStrUtil(StringUtil.isNullOrEmpty(cDLId?.issuerState) || cDLId?.issuerState.length() != 2 ? sDefaultDLIssuerState : cDLId?.issuerState)}</j:DrivingJurisdictionAuthorityNCICLSTACode>");
                     OFS_CaseXml.append('</nc:DriverLicenseIdentification>');
                     OFS_CaseXml.append('</ecf:PersonDriverLicense>');
                 } else
@@ -834,17 +837,17 @@ public class CreateDefPtyReviewFilingInterface {
 
             // Add arrest information
             Arrest cArst = cParty_.collect("arrests").last();
-            if (cArst != null && cArst.arrestDate != null){
+            if (cArst != null && cArst.arrestDate != null) {
                 OFS_CaseXml.append('<criminal:CaseArrest>');
                 OFS_CaseXml.append('<nc:ActivityDate>');
-                sVal = toISO8601UTC(combineDateTime(cArst?.arrestDate,cArst?.arrestTime));
+                sVal = toISO8601UTC(combineDateTime(cArst?.arrestDate, cArst?.arrestTime));
                 logger("Adding arrestDate(${xmlStrUtil(sVal)})");
                 OFS_CaseXml.append("<nc:DateTime>${xmlStrUtil(sVal)}</nc:DateTime>");
                 OFS_CaseXml.append('</nc:ActivityDate>');
 
                 // Add offender booking information
                 Ce_ParticipantReportNumbers cRptArrestNbr = cCase.collect("ce_Participants.ce_ParticipantReportNumbers[type=='LAG' && number != null]").last();
-                if ( cRptArrestNbr != null ) {
+                if (cRptArrestNbr != null) {
                     logger("Adding arrest#(${xmlStrUtil(cRptArrestNbr.number)})");
                     OFS_CaseXml.append('<j:ArrestAgencyRecordIdentification>');
                     OFS_CaseXml.append("<nc:IdentificationID>${xmlStrUtil(cRptArrestNbr.number)}</nc:IdentificationID>");
@@ -856,7 +859,7 @@ public class CreateDefPtyReviewFilingInterface {
                 // Find arrest bail amount from charge statute
                 String sArstBailRec = "Unspecified Bail"; // set default msg if not bail amount
                 StatuteFine cChgBailSt = cParty_.collect("charges[statute != null && statute.classification == 'O'].statute.statuteFines[baseAmount > 0]").last();
-                if ( cChgBailSt != null ) { // valid?
+                if (cChgBailSt != null) { // valid?
                     sArstBailRec = cChgBailSt.baseAmount?.toString();  // set base amount
                     logger "Adding Arrest Bail Recommendation ($sArstBailRec)";
                 }
@@ -871,7 +874,7 @@ public class CreateDefPtyReviewFilingInterface {
                 OFS_CaseXml.append('<j:ArrestOfficial>');
 
                 Identification cArstLeoId = cCase.collect("ce_Participants[type=='LEO' and subType=='SUBMOFCR'].person.identifications[identificationType=='OFCID' and identificationNumber != null]").last();
-                if( cArstLeoId != null ) { // valid arresting LEO
+                if (cArstLeoId != null) { // valid arresting LEO
                     logger("Adding Arresting LEO Badge#(${cArstLeoId?.identificationNumber}) for ${cArstLeoId.person?.lastName}, ${cArstLeoId.person?.firstName}");
                     OFS_CaseXml.append('<j:EnforcementOfficialBadgeIdentification>');
                     OFS_CaseXml.append("<nc:IdentificationID>${xmlStrUtil(cArstLeoId?.identificationNumber)}</nc:IdentificationID>");
@@ -880,7 +883,7 @@ public class CreateDefPtyReviewFilingInterface {
                 }
 
                 // Attempt to locate arresting organization identifier
-                String sArstOrgID= null;
+                String sArstOrgID = null;
 
                 Identification cArstOrdId = cCase.collect("ce_Participants[type=='AGENCY' and subType=='ARRAGENCY'].person.identifications[identificationType=='ODSYAGC' and identificationNumber != null]").last();
 
@@ -891,7 +894,7 @@ public class CreateDefPtyReviewFilingInterface {
 
 
 
-                if( cArstOrdId != null ) { // valid ID
+                if (cArstOrdId != null) { // valid ID
                     sArstOrgID = cArstOrdId?.identificationNumber;
                     logger("Adding arrest organization identification $sArstOrgID");
                 }
@@ -908,13 +911,13 @@ public class CreateDefPtyReviewFilingInterface {
             //cOldCaseFiling = cCase.collect("otherCaseNumbers[type=='CRT' && memo != null && memo.contains(#p1) && memo.contains(#p2)]", "${cParty_.firstName}".toString(),  "${cParty_.lastName}".toString()).orderBy("lastUpdated").last();
             //cOldCaseFiling = cOldCaseFiling == null || cOldCaseFiling.number == null ? cCase.collect("otherCaseNumbers[type=='CRT' && number != null]").orderBy("lastUpdated").last() : cOldCaseFiling;
             logger("801:cOldCaseFiling:${cOldCaseFiling}");
-            if (cOldCaseFiling == null){
+            if (cOldCaseFiling == null) {
                 if (cParty_.charges != null) {    // charges?
                     logger("Adding ${cParty_.charges.size()} charge(s)");
 
                     // Gather up all charges
                     List<Charge> lChgs = cParty_.collect("charges[statute != null && statute.classification == 'O']").filter("Charge is Active and Type is not enhancement or violation");
-                    for( Charge c in lChgs ) {
+                    for (Charge c in lChgs) {
                         OFS_CaseXml.append('<cext:Charge xmlns:cext="urn:tyler:ecf:extensions:Criminal" xsi:schemaLocation="urn:tyler:ecf:extensions:Criminal ..\\..\\..\\Schema\\Substitution\\CriminalExtensions.xsd">');
 
                         logger("Adding chargeNbr(${xmlStrUtil(c.chargeNumber)})");
@@ -941,33 +944,34 @@ public class CreateDefPtyReviewFilingInterface {
                         // Add charge statute information if available
                         if (c.statute != null) {
                             RichList statuteLanguageChoices;
-                            if (!c.collect("chargeAttributes").isEmpty()){
+                            if (!c.collect("chargeAttributes").isEmpty()) {
                                 statuteLanguageChoices = c.statute.collect("statuteLanguageChoices[odysseyAttributes == #p1]", c.collect("chargeAttributes")?.first());
                             }
                             OFS_CaseXml.append('<cext:ChargeStatute>');
 
                             // Override statute w/ generic BR input statute if available else use mapped statute value
                             String sStatuteOfsCode = xmlStrUtil(c.statute.cf_ofsCode); // set default
-                            if (cRule_?._fileToStaging == true){
+                            if (cRule_?._fileToStaging == true) {
                                 sStatuteOfsCode = com.sustain.rule.model.RuleDef.exec("INTERFACE_OFS_UPDATE_FILING_CODES_LOCAL_XML", null, ["lookuplist": "STATUTE", "casecategory": "", "name": "${c.statute.sectionName}:${c.statute.sectionNumber}".toString(), "filingcodeid": ""]).getOutputValue("code");
                             }
-                            if( !StringUtil.isNullOrEmpty((String)cRule_?._ofsGenericStatuteCode) ) {  // available, use generic value?
+                            if (!StringUtil.isNullOrEmpty((String) cRule_?._ofsGenericStatuteCode)) {
+                                // available, use generic value?
                                 sStatuteOfsCode = cRule_._ofsGenericStatuteCode; // set generic value
                                 logger("Statute cf_ofsCode overridden w/ $sStatuteOfsCode");
                             }
 
                             OFS_CaseXml.append('<j:StatuteCodeIdentification>');
-                            if (!c.collect("chargeAttributes").isEmpty() && statuteLanguageChoices != null && !statuteLanguageChoices.isEmpty()){
+                            if (!c.collect("chargeAttributes").isEmpty() && statuteLanguageChoices != null && !statuteLanguageChoices.isEmpty()) {
                                 logger("856:StatuteCodeIdentification:A");
                                 OFS_CaseXml.append("<nc:IdentificationID>${statuteLanguageChoices?.first()?.odysseyCode}</nc:IdentificationID>");
                                 OFS_CaseXml.append('</j:StatuteCodeIdentification>');
-                                OFS_CaseXml.append("<j:StatuteDescriptionText>${statuteLanguageChoices?.first()?.memo?.replaceAll("&","and")}</j:StatuteDescriptionText>");
+                                OFS_CaseXml.append("<j:StatuteDescriptionText>${statuteLanguageChoices?.first()?.memo?.replaceAll("&", "and")}</j:StatuteDescriptionText>");
                                 OFS_CaseXml.append("<j:StatuteLevelText>${statuteLanguageChoices?.first()?.odysseyLevelCode}</j:StatuteLevelText>");
                                 OFS_CaseXml.append("<j:StatuteOffenseIdentification>");
                                 //OFS_CaseXml.append("<nc:IdentificationID>${statuteLanguageChoices?.first()?.choice}</nc:IdentificationID>");
                                 OFS_CaseXml.append("<nc:IdentificationID>${statuteLanguageChoices?.first()?.statute?.source}</nc:IdentificationID>");
                                 OFS_CaseXml.append("</j:StatuteOffenseIdentification>");
-                            } else if (!c.collect("chargeAttributes").isEmpty() && (statuteLanguageChoices == null || statuteLanguageChoices.isEmpty())){
+                            } else if (!c.collect("chargeAttributes").isEmpty() && (statuteLanguageChoices == null || statuteLanguageChoices.isEmpty())) {
                                 logger("856:StatuteCodeIdentification:B");
                                 OFS_CaseXml.append("<nc:IdentificationID>74763</nc:IdentificationID>");
                                 OFS_CaseXml.append('</j:StatuteCodeIdentification>');
@@ -976,7 +980,7 @@ public class CreateDefPtyReviewFilingInterface {
                                 OFS_CaseXml.append("<j:StatuteOffenseIdentification>");
                                 OFS_CaseXml.append("<nc:IdentificationID>123(a)</nc:IdentificationID>");
                                 OFS_CaseXml.append("</j:StatuteOffenseIdentification>");
-                            }else{
+                            } else {
                                 logger("856:StatuteCodeIdentification:C");
                                 OFS_CaseXml.append("<nc:IdentificationID>${xmlStrUtil(sStatuteOfsCode)}</nc:IdentificationID>");
                                 OFS_CaseXml.append('</j:StatuteCodeIdentification>');
@@ -1023,16 +1027,15 @@ public class CreateDefPtyReviewFilingInterface {
                         OFS_CaseXml.append("<cext:PhaseTypeText>${sPhaseTypeText}</cext:PhaseTypeText>");
                         OFS_CaseXml.append('</cext:Charge>');
                     }
-                } else{
+                } else {
                     logger("No valid party[DEF].charges found in case.party");
                 }
-            } else{
+            } else {
                 OFS_CaseXml.append("<criminal:CaseCharge>");
                 OFS_CaseXml.append("<criminal:ChargeOffense/>");
                 OFS_CaseXml.append("<criminal:ChargeAmendedIndicator>false</criminal:ChargeAmendedIndicator>");
                 OFS_CaseXml.append("</criminal:CaseCharge>");
             }
-
 
 
             OFS_CaseXml.append('</criminal:CriminalCase>');
@@ -1057,7 +1060,7 @@ public class CreateDefPtyReviewFilingInterface {
 
             // Check for valid file attached to document
             File fsDoc = cSubDoc.getFile()  // get document file
-            if ( !(fsDoc != null && fsDoc.size() > 0)) { // invalid?
+            if (!(fsDoc != null && fsDoc.size() > 0)) { // invalid?
                 this.aErrorList_.add(new ValidationError(true, cCase.caseNumber, logger("Submitting docId($cSubDoc.id) has no valid file or filesize == 0, review filing aborted")));
                 return bRetVal;
             }
@@ -1069,25 +1072,29 @@ public class CreateDefPtyReviewFilingInterface {
             OFS_CaseXml.append("<nc:DocumentDescriptionText>${getDocumentDescriptionText(cCase, cParty_, cParty_.cf_partySubmit, "PARTY_SUBMIT_TYPE")}</nc:DocumentDescriptionText>");
             //OFS_CaseXml.append("<nc:DocumentDescriptionText>JasonCombs-DocumentDescriptionText</nc:DocumentDescriptionText>");
 
-            OFS_CaseXml.append("<nc:DocumentFileControlID>${cSubDoc.id}</nc:DocumentFileControlID>"); // unique document tracking id
-            OFS_CaseXml.append("<nc:DocumentSequenceID>${iDocumentSequenceID++}</nc:DocumentSequenceID>"); // unique sequence id
+            OFS_CaseXml.append("<nc:DocumentFileControlID>${cSubDoc.id}</nc:DocumentFileControlID>");
+            // unique document tracking id
+            OFS_CaseXml.append("<nc:DocumentSequenceID>${iDocumentSequenceID++}</nc:DocumentSequenceID>");
+            // unique sequence id
             OFS_CaseXml.append('<ecf:DocumentMetadata>');
 
-            LookupAttribute lookupAttribute = DomainObject.find(LookupAttribute.class, "lookupItem.lookupList.name", "PARTY_SUBMIT_TYPE", "attributeType", "IOFS", "lookupItem.code", cParty_?.cf_partySubmit).find({it -> it != null});
+            LookupAttribute lookupAttribute = DomainObject.find(LookupAttribute.class, "lookupItem.lookupList.name", "PARTY_SUBMIT_TYPE", "attributeType", "IOFS", "lookupItem.code", cParty_?.cf_partySubmit).find({ it -> it != null });
             logger("965:filingCodeName: ${lookupAttribute?.name}");
-            String xmlFilingCode = com.sustain.rule.model.RuleDef.exec("INTERFACE_OFS_UPDATE_FILING_CODES_LOCAL_XML", null, ["lookuplist": "PARTY_SUBMIT_TYPE", "casecategory": "8", "name": lookupAttribute?.name, "filingcodeid": ""] ).getValue("code");
+            String xmlFilingCode = com.sustain.rule.model.RuleDef.exec("INTERFACE_OFS_UPDATE_FILING_CODES_LOCAL_XML", null, ["lookuplist": "PARTY_SUBMIT_TYPE", "casecategory": "8", "name": lookupAttribute?.name, "filingcodeid": ""]).getValue("code");
 
-            String leadDocRegisterAction = com.sustain.rule.model.RuleDef.exec("INTERFACE_OFS_UPDATE_FILING_CODES_LOCAL_XML", null, ["lookuplist": "PARTY_SUBMIT_TYPE", "casecategory": "8", "name": cSubDoc.docDef.number4, "filingcodeid": ""] ).getValue("code");
+            String leadDocRegisterAction = com.sustain.rule.model.RuleDef.exec("INTERFACE_OFS_UPDATE_FILING_CODES_LOCAL_XML", null, ["lookuplist": "PARTY_SUBMIT_TYPE", "casecategory": "8", "name": cSubDoc.docDef.number4, "filingcodeid": ""]).getValue("code");
             logger("986:xmlFilingCode:${xmlFilingCode};leadDocRegisterAction:${leadDocRegisterAction}");
             String primaryFilingCode = "";
             //cOldCaseFiling = cCase.collect("otherCaseNumbers[type=='CRT' && memo != null && memo.contains(#p1) && memo.contains(#p2)]", "${cParty_.firstName}".toString(),  "${cParty_.lastName}".toString()).orderBy("lastUpdated").last();
             //cOldCaseFiling = cOldCaseFiling == null || cOldCaseFiling.number == null ? cCase.collect("otherCaseNumbers[type=='CRT' && number != null]").orderBy("lastUpdated").last() : cOldCaseFiling;
             logger("974:cOldCaseFiling:${cOldCaseFiling}");
-            if (cOldCaseFiling == null || leadDocRegisterAction == null || leadDocRegisterAction?.isEmpty()){
-                OFS_CaseXml.append("<j:RegisterActionDescriptionText>${xmlFilingCode}</j:RegisterActionDescriptionText>"); logger("RegisterActionDescriptionText:A");
+            if (cOldCaseFiling == null || leadDocRegisterAction == null || leadDocRegisterAction?.isEmpty()) {
+                OFS_CaseXml.append("<j:RegisterActionDescriptionText>${xmlFilingCode}</j:RegisterActionDescriptionText>");
+                logger("RegisterActionDescriptionText:A");
                 primaryFilingCode = xmlFilingCode;
             } else {
-                OFS_CaseXml.append("<j:RegisterActionDescriptionText>${leadDocRegisterAction}</j:RegisterActionDescriptionText>"); logger("RegisterActionDescriptionText:B");
+                OFS_CaseXml.append("<j:RegisterActionDescriptionText>${leadDocRegisterAction}</j:RegisterActionDescriptionText>");
+                logger("RegisterActionDescriptionText:B");
                 primaryFilingCode = leadDocRegisterAction;
             }
 
@@ -1109,9 +1116,9 @@ public class CreateDefPtyReviewFilingInterface {
 
             // Add submitting file attachment if valid file attached, else reject filing if no file found since it's a must have
             logger("OFS_LOG method call: getDocFileAttachment(cSubDoc, sPrimaryDocCode) ${cSubDoc} ${cSubDoc.title} ${Timestamp.valueOf(LocalDateTime.now())}");
-            StringBuilder sDocFileAttachment= getDocFileAttachment(cSubDoc, sPrimaryDocCode, primaryFilingCode);
+            StringBuilder sDocFileAttachment = getDocFileAttachment(cSubDoc, sPrimaryDocCode, primaryFilingCode);
             //logger("OFS_LOG method call return: getDocFileAttachment(cSubDoc, sPrimaryDocCode) ${cSubDoc} ${cSubDoc.title} ${Timestamp.valueOf(LocalDateTime.now())}");
-            if( sDocFileAttachment == null )    // test for reject error (Validation error will be set if null)
+            if (sDocFileAttachment == null)    // test for reject error (Validation error will be set if null)
                 return bRetVal;
 
             // Add Binary file attachment elements
@@ -1148,10 +1155,10 @@ public class CreateDefPtyReviewFilingInterface {
             int iConnectedFilingID = 2; // unique connecting filing ID's
             //for( Document cDoc in getAllConnectedDocFilings(cCase, cSubDoc) ) {
             logger("OFS_LOG for loop start: for( Document cDoc in cSubDoc.collect('relatedOdysseyDocuments') ) ${Timestamp.valueOf(LocalDateTime.now())}")
-            for( Document cDoc in cSubDoc.collect("relatedOdysseyDocuments") ) {
+            for (Document cDoc in cSubDoc.collect("relatedOdysseyDocuments")) {
                 // Check for valid file attached to document
                 File fcDoc = cDoc.getFile()  // get document file
-                if ( !(fcDoc != null && fcDoc.size() > 0)) { // invalid?
+                if (!(fcDoc != null && fcDoc.size() > 0)) { // invalid?
                     this.aErrorList_.add(new ValidationError(true, cCase.caseNumber, logger("Connnecting docId($cDoc.id) has no valid file or filesize == 0, skipping file")));
                     return bRetVal;
                 }
@@ -1160,7 +1167,7 @@ public class CreateDefPtyReviewFilingInterface {
                 OFS_CaseXml.append("<tyler:FilingConnectedDocument s:id=\"${xmlStrUtil(cDoc?.docDef?.number, "ConnectedFiling${iConnectedFilingID++}")?.replaceAll(" ", "")}${cDoc?.id}\">");
                 //OFS_CaseXml.append("<tyler:FilingLeadDocument s:id=\"${xmlStrUtil(cDoc?.docDef?.number, "Filing${iConnectedFilingID++}")?.replaceAll(" ", "")}\">");
                 //OFS_CaseXml.append("<nc:DocumentDescriptionText>${xmlStrUtil(cDoc?.docDef?.name)}</nc:DocumentDescriptionText>");
-                String connectingDocRegisterAction = com.sustain.rule.model.RuleDef.exec("INTERFACE_OFS_UPDATE_FILING_CODES_LOCAL_XML", null, ["lookuplist": "PARTY_SUBMIT_TYPE", "casecategory": "8", "name": cDoc.docDef.number4, "filingcodeid": ""] ).getValue("code");
+                String connectingDocRegisterAction = com.sustain.rule.model.RuleDef.exec("INTERFACE_OFS_UPDATE_FILING_CODES_LOCAL_XML", null, ["lookuplist": "PARTY_SUBMIT_TYPE", "casecategory": "8", "name": cDoc.docDef.number4, "filingcodeid": ""]).getValue("code");
 
                 //OFS_CaseXml.append("<nc:DocumentDescriptionText>${getDocumentDescriptionText(cCase, cParty_, cDoc.docDef.number4)}</nc:DocumentDescriptionText>");
 
@@ -1189,7 +1196,7 @@ public class CreateDefPtyReviewFilingInterface {
 
                 // Add connecting file attachment
                 logger("OFS_LOG connecting file: method call: getDocFileAttachment(cSubDoc, sPrimaryDocCode) ${cDoc} ${cDoc.title} ${Timestamp.valueOf(LocalDateTime.now())}");
-                if( (sDocFileAttachment=getDocFileAttachment(cDoc, sConnectingDocCode, connectingDocRegisterAction)) == null ){
+                if ((sDocFileAttachment = getDocFileAttachment(cDoc, sConnectingDocCode, connectingDocRegisterAction)) == null) {
                     return bRetVal;
                 }
                 //logger("OFS_LOG connecting file: method call return: getDocFileAttachment(cSubDoc, sPrimaryDocCode) ${cDoc} ${cDoc.title} ${Timestamp.valueOf(LocalDateTime.now())}");
@@ -1199,47 +1206,47 @@ public class CreateDefPtyReviewFilingInterface {
                 //OFS_CaseXml.append('</tyler:FilingLeadDocument>');
             }
             logger("OFS_LOG for loop end: for( Document cDoc in cSubDoc.collect('relatedOdysseyDocuments') ) ${Timestamp.valueOf(LocalDateTime.now())}")
-            OFS_CaseXml.append( '</CoreFilingMessage>' );
+            OFS_CaseXml.append('</CoreFilingMessage>');
 
             // Filing payment message
             logger("Attaching payment message")
-            OFS_CaseXml.append( '<PaymentMessage xsi:schemaLocation="urn:oasis:names:tc:legalxml-courtfiling:schema:xsd:PaymentMessage-4.0 ..\\..\\..\\Schema\\message\\ECF-4.0-PaymentMessage.xsd" '
+            OFS_CaseXml.append('<PaymentMessage xsi:schemaLocation="urn:oasis:names:tc:legalxml-courtfiling:schema:xsd:PaymentMessage-4.0 ..\\..\\..\\Schema\\message\\ECF-4.0-PaymentMessage.xsd" '
                     + 'xmlns="urn:oasis:names:tc:legalxml-courtfiling:schema:xsd:PaymentMessage-4.0" '
                     + 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
                     + 'xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" '
                     + 'xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">');
-            OFS_CaseXml.append( '<FeeExceptionReasonCode />')
-            OFS_CaseXml.append( '<FeeExceptionSupportingText />');
-            OFS_CaseXml.append( '<PayerName />');
-            OFS_CaseXml.append( '<cac:AllowanceCharge>');
-            OFS_CaseXml.append( '<cbc:ChargeIndicator>true</cbc:ChargeIndicator>');
-            OFS_CaseXml.append( '<cbc:Amount currencyID="USD">0.00</cbc:Amount>');
-            OFS_CaseXml.append( '<cac:TaxCategory>');
-            OFS_CaseXml.append( '<cbc:Percent>.00</cbc:Percent>');
-            OFS_CaseXml.append( '<cac:TaxScheme />');
-            OFS_CaseXml.append( '</cac:TaxCategory>');
-            OFS_CaseXml.append( '<cac:TaxTotal>');
-            OFS_CaseXml.append( '<cbc:TaxAmount currencyID="USD">.00</cbc:TaxAmount>');
-            OFS_CaseXml.append( '</cac:TaxTotal>');
-            OFS_CaseXml.append( '<cac:PaymentMeans>');
-            OFS_CaseXml.append( '<cbc:PaymentMeansCode />');
-            OFS_CaseXml.append( '<cbc:PaymentID></cbc:PaymentID>');
+            OFS_CaseXml.append('<FeeExceptionReasonCode />')
+            OFS_CaseXml.append('<FeeExceptionSupportingText />');
+            OFS_CaseXml.append('<PayerName />');
+            OFS_CaseXml.append('<cac:AllowanceCharge>');
+            OFS_CaseXml.append('<cbc:ChargeIndicator>true</cbc:ChargeIndicator>');
+            OFS_CaseXml.append('<cbc:Amount currencyID="USD">0.00</cbc:Amount>');
+            OFS_CaseXml.append('<cac:TaxCategory>');
+            OFS_CaseXml.append('<cbc:Percent>.00</cbc:Percent>');
+            OFS_CaseXml.append('<cac:TaxScheme />');
+            OFS_CaseXml.append('</cac:TaxCategory>');
+            OFS_CaseXml.append('<cac:TaxTotal>');
+            OFS_CaseXml.append('<cbc:TaxAmount currencyID="USD">.00</cbc:TaxAmount>');
+            OFS_CaseXml.append('</cac:TaxTotal>');
+            OFS_CaseXml.append('<cac:PaymentMeans>');
+            OFS_CaseXml.append('<cbc:PaymentMeansCode />');
+            OFS_CaseXml.append('<cbc:PaymentID></cbc:PaymentID>');
             // production payment id 26ebdb4e-f36d-473e-a5ab-c2f8eb0e9cd3
             //OFS_CaseXml.append( '<cbc:PaymentID>26ebdb4e-f36d-473e-a5ab-c2f8eb0e9cd3</cbc:PaymentID>');
             // staging payment id 95e28d07-d933-4963-88e4-2772d6f8448a
             //OFS_CaseXml.append( '<cbc:PaymentID>95e28d07-d933-4963-88e4-2772d6f8448a</cbc:PaymentID>');
-            OFS_CaseXml.append( '</cac:PaymentMeans>');
-            OFS_CaseXml.append( '</cac:AllowanceCharge>');
-            OFS_CaseXml.append( '<cac:Address>');
-            OFS_CaseXml.append( '</cac:Address>');
-            OFS_CaseXml.append( '<cac:Payment>');
-            OFS_CaseXml.append( '</cac:Payment>');
-            OFS_CaseXml.append( '</PaymentMessage>');
+            OFS_CaseXml.append('</cac:PaymentMeans>');
+            OFS_CaseXml.append('</cac:AllowanceCharge>');
+            OFS_CaseXml.append('<cac:Address>');
+            OFS_CaseXml.append('</cac:Address>');
+            OFS_CaseXml.append('<cac:Payment>');
+            OFS_CaseXml.append('</cac:Payment>');
+            OFS_CaseXml.append('</PaymentMessage>');
 
             // Add ePros configuration to the reviewFiling message
             logger("Attaching eProsCfg tag");
 
-            CaseAssignment filingAttorney = cCase.collect("assignments[assignmentRole == 'REV' && status == 'CUR']").find({it -> it.person != null && it.person.lastName != null});
+            CaseAssignment filingAttorney = cCase.collect("assignments[assignmentRole == 'REV' && status == 'CUR']").find({ it -> it.person != null && it.person.lastName != null });
             //filingAttorney = filingAttorney == null ? cCase.collect("assignments[assignmentRole == 'REV' && status == 'CUR']").find({it -> it.person != null && it.person.lastName != null}) : filingAttorney;
             filingAttorney = filingAttorney != null && filingAttorney.person != null && filingAttorney.person.lastName != null && !filingAttorney.person.collect("identifications[identificationType == 'BAR' && identificationNumber != null]").isEmpty() ? filingAttorney : null;
             String attyBarNumber = filingAttorney != null ? filingAttorney.person.collect("identifications[identificationType == 'BAR']").first()?.identificationNumber : "";
@@ -1248,89 +1255,90 @@ public class CreateDefPtyReviewFilingInterface {
             String attyMiddleName = filingAttorney != null && filingAttorney?.person?.middleName != null ? filingAttorney.person.middleName : "";
             logger("1141:cParty_:${cParty_}");
             //cParty_.firstName cParty_.lastName cParty_.lastName
-            logger("1117:cOldCaseFiling :${cOldCaseFiling }");
+            logger("1117:cOldCaseFiling :${cOldCaseFiling}");
             String otherCaseNumberMemo = cOldCaseFiling?.memo;
             otherCaseNumberMemo = otherCaseNumberMemo == null || otherCaseNumberMemo.isEmpty() ? "" : otherCaseNumberMemo;
-            OFS_CaseXml.append( '<eProsCfg>');
+            OFS_CaseXml.append('<eProsCfg>');
 
-            OFS_CaseXml.append( "<FilerFirstName>${filingUserFirstName}</FilerFirstName>" );
-            OFS_CaseXml.append( "<FilerLastName>${filingUserLastName}</FilerLastName>" );
-            OFS_CaseXml.append( "<FilerEmail>${filingUserEmail}</FilerEmail>" );
-            OFS_CaseXml.append( "<FilerPassword>${filingUserPassword}</FilerPassword>" );
+            OFS_CaseXml.append("<FilerFirstName>${filingUserFirstName}</FilerFirstName>");
+            OFS_CaseXml.append("<FilerLastName>${filingUserLastName}</FilerLastName>");
+            OFS_CaseXml.append("<FilerEmail>${filingUserEmail}</FilerEmail>");
+            OFS_CaseXml.append("<FilerPassword>${filingUserPassword}</FilerPassword>");
 
-            OFS_CaseXml.append( "<DefaultFilerEmail>${defaultFilingUserEmail}</DefaultFilerEmail>" );
-            OFS_CaseXml.append( "<DefaultFilerPassword>${defaultFilingUserPassword}</DefaultFilerPassword>" );
+            OFS_CaseXml.append("<DefaultFilerEmail>${defaultFilingUserEmail}</DefaultFilerEmail>");
+            OFS_CaseXml.append("<DefaultFilerPassword>${defaultFilingUserPassword}</DefaultFilerPassword>");
 
 
-            if (otherCaseNumberMemo != null && !otherCaseNumberMemo.isEmpty()){
+            if (otherCaseNumberMemo != null && !otherCaseNumberMemo.isEmpty()) {
                 logger("TEST:CaseTitle:1225<CaseTitle>");
-                OFS_CaseXml.append( "<CaseInitialFilingID>${otherCaseNumberMemo.substring(0, otherCaseNumberMemo.indexOf(" ")).trim()}</CaseInitialFilingID>" );
-                OFS_CaseXml.append( "<CaseTitle>${otherCaseNumberMemo.trim()}</CaseTitle>" );
+                OFS_CaseXml.append("<CaseInitialFilingID>${otherCaseNumberMemo.substring(0, otherCaseNumberMemo.indexOf(" ")).trim()}</CaseInitialFilingID>");
+                OFS_CaseXml.append("<CaseTitle>${otherCaseNumberMemo.trim()}</CaseTitle>");
             } else {
                 logger("TEST:CaseTitle:1229<CaseTitle>");
-                OFS_CaseXml.append( "<CaseInitialFilingID></CaseInitialFilingID>" );
-                OFS_CaseXml.append( "<CaseTitle></CaseTitle>" );
+                OFS_CaseXml.append("<CaseInitialFilingID></CaseInitialFilingID>");
+                OFS_CaseXml.append("<CaseTitle></CaseTitle>");
             }
 
-            OFS_CaseXml.append( "<DefendantLastName>${cParty_?.person?.lastName?.trim() != null ? cParty_?.person?.lastName?.trim() : ''}</DefendantLastName>" );
-            OFS_CaseXml.append( "<DefendantFirstName>${cParty_?.person?.firstName?.trim() != null ? cParty_?.person?.firstName?.trim() : ''}</DefendantFirstName>" );
-            OFS_CaseXml.append( "<DefendantMiddleName>${cParty_?.person?.middleName?.trim() != null ? cParty_?.person?.middleName?.trim() : ''}</DefendantMiddleName>" );
-            OFS_CaseXml.append( "<DefendantCaseTrackingID>${cParty_?.cf_caseTrackingID?.trim() != null ? cParty_?.cf_caseTrackingID?.trim() : ''}</DefendantCaseTrackingID>" ); //${cParty_?.cf_caseTrackingID?.trim()}
+            OFS_CaseXml.append("<DefendantLastName>${cParty_?.person?.lastName?.trim() != null ? cParty_?.person?.lastName?.trim() : ''}</DefendantLastName>");
+            OFS_CaseXml.append("<DefendantFirstName>${cParty_?.person?.firstName?.trim() != null ? cParty_?.person?.firstName?.trim() : ''}</DefendantFirstName>");
+            OFS_CaseXml.append("<DefendantMiddleName>${cParty_?.person?.middleName?.trim() != null ? cParty_?.person?.middleName?.trim() : ''}</DefendantMiddleName>");
+            OFS_CaseXml.append("<DefendantCaseTrackingID>${cParty_?.cf_caseTrackingID?.trim() != null ? cParty_?.cf_caseTrackingID?.trim() : ''}</DefendantCaseTrackingID>");
+            //${cParty_?.cf_caseTrackingID?.trim()}
 
-            OFS_CaseXml.append( "<CaseCourtLocation>${xmlStrUtil(eProsCfg_.sCaseCourtLocation_)}</CaseCourtLocation>" );
-            if (eProsCfg_.sCaseNumber_ == null){
-                OFS_CaseXml.append( "<CaseNumber/>" );
-                OFS_CaseXml.append( "<CaseDocketNumber/>" );
+            OFS_CaseXml.append("<CaseCourtLocation>${xmlStrUtil(eProsCfg_.sCaseCourtLocation_)}</CaseCourtLocation>");
+            if (eProsCfg_.sCaseNumber_ == null) {
+                OFS_CaseXml.append("<CaseNumber/>");
+                OFS_CaseXml.append("<CaseDocketNumber/>");
             } else {
-                OFS_CaseXml.append( "<CaseNumber>${eProsCfg_.sCaseNumber_}</CaseNumber>" );
-                OFS_CaseXml.append( "<CaseDocketNumber>${eProsCfg_.sCaseNumber_}</CaseDocketNumber>" );
+                OFS_CaseXml.append("<CaseNumber>${eProsCfg_.sCaseNumber_}</CaseNumber>");
+                OFS_CaseXml.append("<CaseDocketNumber>${eProsCfg_.sCaseNumber_}</CaseDocketNumber>");
             }
-            OFS_CaseXml.append( "<AttyBarNumber>${attyBarNumber}</AttyBarNumber>" );
-            OFS_CaseXml.append( "<AttyLastName>${attyLastName}</AttyLastName>" );
-            OFS_CaseXml.append( "<AttyFirstName>${attyFirstName}</AttyFirstName>" );
-            OFS_CaseXml.append( "<AttyMiddleName>${attyMiddleName}</AttyMiddleName>" );
-            OFS_CaseXml.append( "<FilingDocId>${xmlStrUtil(eProsCfg_.sFilingDocId_)}</FilingDocId>" );
+            OFS_CaseXml.append("<AttyBarNumber>${attyBarNumber}</AttyBarNumber>");
+            OFS_CaseXml.append("<AttyLastName>${attyLastName}</AttyLastName>");
+            OFS_CaseXml.append("<AttyFirstName>${attyFirstName}</AttyFirstName>");
+            OFS_CaseXml.append("<AttyMiddleName>${attyMiddleName}</AttyMiddleName>");
+            OFS_CaseXml.append("<FilingDocId>${xmlStrUtil(eProsCfg_.sFilingDocId_)}</FilingDocId>");
             logger("1207:")
             // Add all missing statutes
-            OFS_CaseXml.append( "<MissingStatutes>");
-            for( ChargeStatuteObj ms in aMissingOfsStatuteList) { // cue sectionNbr for ELS
-                OFS_CaseXml.append( "<ChargeSequenceID id=\"${xmlStrUtil(ms.sChargeID_)}\">" );
-                OFS_CaseXml.append( "<StatuteCodeIdentificationWord>${xmlStrUtil(ms.sStatuteSectionNumber_)}</StatuteCodeIdentificationWord>");
-                OFS_CaseXml.append( "<StatuteCodeIdentificationDesc>${xmlStrUtil(ms.sStatuteSectionName_)}</StatuteCodeIdentificationDesc>");
+            OFS_CaseXml.append("<MissingStatutes>");
+            for (ChargeStatuteObj ms in aMissingOfsStatuteList) { // cue sectionNbr for ELS
+                OFS_CaseXml.append("<ChargeSequenceID id=\"${xmlStrUtil(ms.sChargeID_)}\">");
+                OFS_CaseXml.append("<StatuteCodeIdentificationWord>${xmlStrUtil(ms.sStatuteSectionNumber_)}</StatuteCodeIdentificationWord>");
+                OFS_CaseXml.append("<StatuteCodeIdentificationDesc>${xmlStrUtil(ms.sStatuteSectionName_)}</StatuteCodeIdentificationDesc>");
 
                 // Add charge statute attributes
-                OFS_CaseXml.append( "<StatuteCodeAttributes>" );
-                if( ms.lsStatuteAttributeLst_ != null ) { // attributes?
-                    for( String at in ms.lsStatuteAttributeLst_ )
-                        OFS_CaseXml.append( "<StatuteCodeAttributeWord>${xmlStrUtil(at)}</StatuteCodeAttributeWord>");
+                OFS_CaseXml.append("<StatuteCodeAttributes>");
+                if (ms.lsStatuteAttributeLst_ != null) { // attributes?
+                    for (String at in ms.lsStatuteAttributeLst_)
+                        OFS_CaseXml.append("<StatuteCodeAttributeWord>${xmlStrUtil(at)}</StatuteCodeAttributeWord>");
                 } else { // default
-                    OFS_CaseXml.append( "<StatuteCodeAttributeWord />" );
+                    OFS_CaseXml.append("<StatuteCodeAttributeWord />");
                 }
-                OFS_CaseXml.append( "</StatuteCodeAttributes>" );
+                OFS_CaseXml.append("</StatuteCodeAttributes>");
 
-                OFS_CaseXml.append( "<AdditionalStatutes>" );
-                OFS_CaseXml.append( "<AdditionalStatute>" );
-                OFS_CaseXml.append( "<StatuteCodeIdentificationWord />" );
-                OFS_CaseXml.append( "<StatuteCodeIdentificationDesc />" );
-                OFS_CaseXml.append( "<StatuteCodeAttributes>" );
-                OFS_CaseXml.append( "<StatuteCodeAttributeWord/>" );
-                OFS_CaseXml.append( "</StatuteCodeAttributes>" );
-                OFS_CaseXml.append( "</AdditionalStatute>" );
-                OFS_CaseXml.append( "</AdditionalStatutes>" );
-                OFS_CaseXml.append( "</ChargeSequenceID>" );
+                OFS_CaseXml.append("<AdditionalStatutes>");
+                OFS_CaseXml.append("<AdditionalStatute>");
+                OFS_CaseXml.append("<StatuteCodeIdentificationWord />");
+                OFS_CaseXml.append("<StatuteCodeIdentificationDesc />");
+                OFS_CaseXml.append("<StatuteCodeAttributes>");
+                OFS_CaseXml.append("<StatuteCodeAttributeWord/>");
+                OFS_CaseXml.append("</StatuteCodeAttributes>");
+                OFS_CaseXml.append("</AdditionalStatute>");
+                OFS_CaseXml.append("</AdditionalStatutes>");
+                OFS_CaseXml.append("</ChargeSequenceID>");
             }
-            OFS_CaseXml.append( "</MissingStatutes>" );
+            OFS_CaseXml.append("</MissingStatutes>");
 
-            OFS_CaseXml.append( '</eProsCfg>')
-            OFS_CaseXml.append( '</ReviewFilingRequestMessage>' );
+            OFS_CaseXml.append('</eProsCfg>')
+            OFS_CaseXml.append('</ReviewFilingRequestMessage>');
             logger("1240:")
             // Write/queue reviewFiling xml payload to disk
-            String sSmbReviewFilePath= null;
+            String sSmbReviewFilePath = null;
             try {
 
                 // Connect to SMB network file share object and set credentials
-                SmbFileWrapper cSmbFileShareObj = new SmbFileWrapper(cRule_._eslOutboundFilingSmbPath, cSysProps_.sSmbFileUsername_,cSysProps_.sSmbFilePassword_,"");
-                if( !cSmbFileShareObj.isConnected() ) {
+                SmbFileWrapper cSmbFileShareObj = new SmbFileWrapper(cRule_._eslOutboundFilingSmbPath, cSysProps_.sSmbFileUsername_, cSysProps_.sSmbFilePassword_, "");
+                if (!cSmbFileShareObj.isConnected()) {
                     this.aErrorList_.add(new ValidationError(true, cCase.caseNumber, logger("1248:Error connecting to ${cRule_._eslOutboundFilingSmbPath} network URL to write reviewFiling, check server/user/pwd credentials")));
                     return bRetVal;
                 }
@@ -1338,7 +1346,7 @@ public class CreateDefPtyReviewFilingInterface {
                 // Create path + filename (e.g. Case#_ddMMyyyyHHmmssSSS.xml)
                 String sTimeStamp = new SimpleDateFormat("ddMMyyyyHHmmssSSS").format(new Date());
                 String uniqueFileName = "${cCase.caseNumber}_${sTimeStamp}.xml";
-                sSmbReviewFilePath= cSmbFileShareObj.smbURL + uniqueFileName;
+                sSmbReviewFilePath = cSmbFileShareObj.smbURL + uniqueFileName;
 
                 logger("1257:Writing OFS reviewFiling xml payload to $sSmbReviewFilePath");
 
@@ -1346,13 +1354,14 @@ public class CreateDefPtyReviewFilingInterface {
                 logger("1260:OFS_LOG saving file to queued directory");
 
                 String sXmlSchema;
-                try{
-                    sXmlSchema = XmlUtil.serialize(OFS_CaseXml.toString().replaceAll("&", "and"));	logger("1261:");
-                }catch(Exception ex){
+                try {
+                    sXmlSchema = XmlUtil.serialize(OFS_CaseXml.toString().replaceAll("&", "and")); logger("1261:");
+                } catch (Exception ex) {
                     logger("1266:Exception serializing xml data as string");
                 }
 
-                File courtFiling = new File("${cRule_._eslOutboundFilingSmbPath}\\${uniqueFileName}".toString()); logger("1267:")
+                File courtFiling = new File("${cRule_._eslOutboundFilingSmbPath}\\${uniqueFileName}".toString());
+                logger("1267:")
                 BufferedWriter bw = new BufferedWriter(new FileWriter(courtFiling)); logger("1268:")
                 bw.write(sXmlSchema, 0, sXmlSchema.length()); logger("1269:")
                 bw.close(); logger("1270:")
@@ -1363,16 +1372,16 @@ public class CreateDefPtyReviewFilingInterface {
                 String xmlFileContents = "";
                 Stream<String> line = bf.lines();
                 logger("OFS_LOG line ${line}")
-                ArrayList array = (ArrayList)line.toArray();
-                for (i in array){
+                ArrayList array = (ArrayList) line.toArray();
+                for (i in array) {
                     xmlFileContents += i;
                 }
                 fr.close();
                 bf.close();
                 GPathResult xmlIPSluper = parser.parseText(xmlFileContents);
                 xmlIPSluper.CoreFilingMessage.FilingLeadDocument.DocumentRendition.DocumentRenditionMetadata.DocumentAttachment.BinaryBase64Object.replaceBody(org.apache.commons.codec.binary.Base64.encodeBase64String(cRule_._docStatus.document.file.bytes));
-                for (relatedOdysseyDocument in cRule_._docStatus.document.collect("relatedOdysseyDocuments")){
-                    GPathResult filingConnectedDocument = xmlIPSluper.CoreFilingMessage.FilingConnectedDocument.find{ it -> it.DocumentFileControlID.text() == relatedOdysseyDocument.id.toString()};
+                for (relatedOdysseyDocument in cRule_._docStatus.document.collect("relatedOdysseyDocuments")) {
+                    GPathResult filingConnectedDocument = xmlIPSluper.CoreFilingMessage.FilingConnectedDocument.find { it -> it.DocumentFileControlID.text() == relatedOdysseyDocument.id.toString() };
                     filingConnectedDocument.DocumentRendition.DocumentRenditionMetadata.DocumentAttachment.BinaryBase64Object.replaceBody(org.apache.commons.codec.binary.Base64.encodeBase64String(relatedOdysseyDocument.file.bytes));
                 }
                 PrintWriter writer = new PrintWriter(courtFiling);
@@ -1383,8 +1392,8 @@ public class CreateDefPtyReviewFilingInterface {
                 //org.apache.commons.io.FileUtils.moveFileToDirectory(courtFiling, new File("\\\\torreypines\\OFS\\out\\queued"), false);
                 /*OFS_File_Update*/
                 // Set filing status attributes
-                this.bReviewFilingSent_= true; // indicate filing sent to queue
-                bRetVal= true;	// indicate success
+                this.bReviewFilingSent_ = true; // indicate filing sent to queue
+                bRetVal = true;    // indicate success
 
             } catch (Exception ex) {
                 this.aErrorList_.add(new ValidationError(true, cCase.caseNumber, logger("$sSmbReviewFilePath file write / xml validation error, reviewFiling aborted")));
@@ -1403,16 +1412,16 @@ public class CreateDefPtyReviewFilingInterface {
      * is null add default if present. If no default, return an empty string reference.
      * @param sBuf Class:String input buffer
      */
-    public String xmlStrUtil( String sBuf, String sDefault="" ) {
-        if( sBuf == null ) { // null?
-            return( (!StringUtil.isNullOrEmpty(sDefault))? sDefault: "" );
-        }else{ // valid!
-            if( sBuf == 'null' ){
-                sBuf="";
+    public String xmlStrUtil(String sBuf, String sDefault = "") {
+        if (sBuf == null) { // null?
+            return ((!StringUtil.isNullOrEmpty(sDefault)) ? sDefault : "");
+        } else { // valid!
+            if (sBuf == 'null') {
+                sBuf = "";
             }
             sBuf = sBuf.trim();
             //return( sBuf.trim().replaceFirst("\\W","") );
-            return sBuf.matches("\\W.*") && !sBuf.matches("[-].*") ? sBuf.replaceFirst("\\W","") : sBuf;
+            return sBuf.matches("\\W.*") && !sBuf.matches("[-].*") ? sBuf.replaceFirst("\\W", "") : sBuf;
         }
     }
 
@@ -1424,13 +1433,13 @@ public class CreateDefPtyReviewFilingInterface {
      * @param cParty
      * @returns true if successful or false if no 'OFSSUB' found
      */
-    public boolean initializeDocumentStatus( Party cParty ) {
+    public boolean initializeDocumentStatus(Party cParty) {
         boolean bRetVal = false;
 
         try {
             logger "Searching for valid DEF 'OFSSUB' document status set";
             DocumentStatus cDocStatus = cRule_._docStatus;
-            if( cDocStatus != null ) {
+            if (cDocStatus != null) {
                 logger "Lastest document w/ ${mDocStatus_.ofsSubmit} status found - ${cDocStatus.dateCreated}";
 
                 // Cleanup any older 'OFS???' statuses leaving just the newest status if exists
@@ -1439,7 +1448,7 @@ public class CreateDefPtyReviewFilingInterface {
                         logger "Removing older $ds.statusType document status - $ds.dateCreated";
                         //ds.deleteRemoveFromPeers(); // remove old status
                 }*/
-                bRetVal= true;	// report success
+                bRetVal = true;    // report success
             }
 
         } catch (Exception ex) {
@@ -1452,11 +1461,11 @@ public class CreateDefPtyReviewFilingInterface {
 
     /** ----------------------------------------------------------------------------------------------------
      *  Method to retrieve lookup attribute code based on a lookupList code and attribute type.
-     *  @param sLookupList - LookupList name
-     *  @param sCode - LookupList code of attribute.
-     *  @param sAtrType - Attribute type of attribute to extract.
-     *  @param bUseDefaultCode - If true, return code value as default if no attribute found.
-     *  @returns attribute of code if found. Otherwise returns default code.
+     * @param sLookupList - LookupList name
+     * @param sCode - LookupList code of attribute.
+     * @param sAtrType - Attribute type of attribute to extract.
+     * @param bUseDefaultCode - If true, return code value as default if no attribute found.
+     * @returns attribute of code if found. Otherwise returns default code.
      */
     /*public String getLookupListCodeAttribute( String sLookupList, String sCode, String sAtrType, boolean bUseDefaultCode=true ) {
         String sAtr= (bUseDefaultCode)? sCode: null;
@@ -1472,13 +1481,13 @@ public class CreateDefPtyReviewFilingInterface {
         return sAtr;
     }*/
 
-    public String getLookupListCodeAttribute( String sLookupList, String sCode, String sAtrType, String courtCode, String caseCategory,  String filingCodeID, String countryCode) {
-        String sAtr= sCode;
+    public String getLookupListCodeAttribute(String sLookupList, String sCode, String sAtrType, String courtCode, String caseCategory, String filingCodeID, String countryCode) {
+        String sAtr = sCode;
         String attrValue = "";
-        if( sCode != null ) {
-            LookupAttribute cAttr = DomainObject.find(LookupAttribute.class, "lookupItem.lookupList.name", sLookupList, "attributeType", "IOFS", "lookupItem.code", sCode).find({it -> it != null});
-            cAttr = cAttr == null ? DomainObject.find(LookupAttribute.class, "lookupItem.lookupList.name", sLookupList, "attributeType", "IOFS", "lookupItem.label", sCode).find({it -> it != null}) : cAttr;
-            attrValue = com.sustain.rule.model.RuleDef.exec("INTERFACE_OFS_UPDATE_FILING_CODES_LOCAL_XML", null, ["lookuplist": sLookupList, "casecategory": caseCategory, "name": cAttr?.name, "filingcodeid": filingCodeID] ).getValue("code");
+        if (sCode != null) {
+            LookupAttribute cAttr = DomainObject.find(LookupAttribute.class, "lookupItem.lookupList.name", sLookupList, "attributeType", "IOFS", "lookupItem.code", sCode).find({ it -> it != null });
+            cAttr = cAttr == null ? DomainObject.find(LookupAttribute.class, "lookupItem.lookupList.name", sLookupList, "attributeType", "IOFS", "lookupItem.label", sCode).find({ it -> it != null }) : cAttr;
+            attrValue = com.sustain.rule.model.RuleDef.exec("INTERFACE_OFS_UPDATE_FILING_CODES_LOCAL_XML", null, ["lookuplist": sLookupList, "casecategory": caseCategory, "name": cAttr?.name, "filingcodeid": filingCodeID]).getValue("code");
 
             if (!attrValue.isEmpty()) {
                 sAtr = attrValue;
@@ -1489,52 +1498,52 @@ public class CreateDefPtyReviewFilingInterface {
         return sAtr;
     }
 
-    public String getDocumentDescriptionText(Case cse, Party filingParty, String filingDocumentCode){
+    public String getDocumentDescriptionText(Case cse, Party filingParty, String filingDocumentCode) {
         StringJoiner filingDocumentDescriptionText = new StringJoiner(", ");
-        if (filingParty != null){
-            PartySpecialStatus partySpecialStatus = filingParty.collect("specialStatuses[status != null]").find({ps -> ps != null});
-            String pSSAttribute = DomainObject.find(LookupAttribute.class, "lookupItem.lookupList.name", "PARTY_SPECIAL_STATUS", "attributeType", "IOFS", "lookupItem.code", partySpecialStatus?.status).find({it -> it != null})?.value;
-            if (pSSAttribute != null){
+        if (filingParty != null) {
+            PartySpecialStatus partySpecialStatus = filingParty.collect("specialStatuses[status != null]").find({ ps -> ps != null });
+            String pSSAttribute = DomainObject.find(LookupAttribute.class, "lookupItem.lookupList.name", "PARTY_SPECIAL_STATUS", "attributeType", "IOFS", "lookupItem.code", partySpecialStatus?.status).find({ it -> it != null })?.value;
+            if (pSSAttribute != null) {
                 filingDocumentDescriptionText.add("${pSSAttribute}");
             }
-            if (filingParty.startDate != null){
+            if (filingParty.startDate != null) {
                 filingDocumentDescriptionText.add("" + new SimpleDateFormat("MM/dd/yyyy").format(cParty_.startDate));
             }
         }
         filingDocumentDescriptionText.add("${cse.caseNumber}${cse.caseTeamCode}");
-        if( Condition.get("Case has multiple open defendants").isTrue(cse)){
+        if (Condition.get("Case has multiple open defendants").isTrue(cse)) {
             filingDocumentDescriptionText.add("co-defendant");
         }
         /*if (filingDocumentCode != null){
           filingDocumentDescriptionText.add(filingDocumentCode);
         }*/
 
-        if (!cse.collect("otherCaseNumbers[type == 'NYF' && endDate == null && number != null]").orderBy("id").isEmpty()){
+        if (!cse.collect("otherCaseNumbers[type == 'NYF' && endDate == null && number != null]").orderBy("id").isEmpty()) {
             filingDocumentDescriptionText.add(cse.collect("otherCaseNumbers[type == 'NYF' && endDate == null && number != null]").orderBy("id")?.first()?.number?.toString());
         }
         return filingDocumentDescriptionText.toString();
     }
 
-    public String getDocumentDescriptionText(Case cse, Party filingParty, String filingDocumentCode, String filingDocumentCodeLL){
+    public String getDocumentDescriptionText(Case cse, Party filingParty, String filingDocumentCode, String filingDocumentCodeLL) {
         StringJoiner filingDocumentDescriptionText = new StringJoiner(", ");
-        if (filingParty != null){
-            PartySpecialStatus partySpecialStatus = filingParty.collect("specialStatuses[status != null]").find({ps -> ps != null});
-            String pSSAttribute = DomainObject.find(LookupAttribute.class, "lookupItem.lookupList.name", "PARTY_SPECIAL_STATUS", "attributeType", "IOFS", "lookupItem.code", partySpecialStatus?.status).find({it -> it != null})?.value;
-            if (pSSAttribute != null){
+        if (filingParty != null) {
+            PartySpecialStatus partySpecialStatus = filingParty.collect("specialStatuses[status != null]").find({ ps -> ps != null });
+            String pSSAttribute = DomainObject.find(LookupAttribute.class, "lookupItem.lookupList.name", "PARTY_SPECIAL_STATUS", "attributeType", "IOFS", "lookupItem.code", partySpecialStatus?.status).find({ it -> it != null })?.value;
+            if (pSSAttribute != null) {
                 filingDocumentDescriptionText.add("${pSSAttribute}");
             }
-            if (filingParty.startDate != null){
+            if (filingParty.startDate != null) {
                 filingDocumentDescriptionText.add("" + new SimpleDateFormat("MM/dd/yyyy").format(cParty_.startDate));
             }
         }
         filingDocumentDescriptionText.add("${cse.caseNumber}${cse.caseTeamCode}");
-        if( Condition.get("Case has multiple open defendants").isTrue(cse)){
+        if (Condition.get("Case has multiple open defendants").isTrue(cse)) {
             filingDocumentDescriptionText.add("co-defendant");
         }
         /*if (filingDocumentCode != null){
           filingDocumentDescriptionText.add(com.sustain.lookuplist.model.LookupItem.getLabel(filingDocumentCodeLL, filingDocumentCode));
         }*/
-        if (!cse.collect("otherCaseNumbers[type == 'NYF' && endDate == null && number != null]").orderBy("id").isEmpty()){
+        if (!cse.collect("otherCaseNumbers[type == 'NYF' && endDate == null && number != null]").orderBy("id").isEmpty()) {
             filingDocumentDescriptionText.add(cse.collect("otherCaseNumbers[type == 'NYF' && endDate == null && number != null]").orderBy("id")?.first()?.number?.toString());
         }
         return filingDocumentDescriptionText.toString();
@@ -1548,14 +1557,14 @@ public class CreateDefPtyReviewFilingInterface {
      * @param sTo - Set to
      * @Returns - Nothing
      */
-    public void updateDocumentStatus( Party cParty, String sWith, String sTo ){
-        if( cParty == null )
+    public void updateDocumentStatus(Party cParty, String sWith, String sTo) {
+        if (cParty == null)
             return;
 
         try {
             logger "Searching for latest document status $sWith";
             DocumentStatus cDocStatus = cRule_._docStatus;
-            if( cDocStatus != null ) {
+            if (cDocStatus != null) {
                 logger "Found status w/ $sWith set on doc, updating latest to $sTo";
                 cDocStatus.statusType = sTo;
                 cDocStatus.beginDate = new Date();
@@ -1573,22 +1582,21 @@ public class CreateDefPtyReviewFilingInterface {
      *  This method is called when the cf_ofsCode is blank. It will generate a custom OFS sectionNumber using
      *  the chargeAttributes field. If there is a chargeAttribute marked, the attribute of type OIFS will be queried
      *  on the lookup list and the Value will be added to the statute list and then to the eProsCfg xml object.
-     *  @param cCharge - Class:Charge - Party charge
-     *  @Returns list of statute attributes
+     * @param cCharge - Class:Charge - Party charge
+     * @Returns list of statute attributes
      */
-    public List<String> getOfsChgStatuteAttributes( Charge cCharge )
-    {
-        if( cCharge.statute == null )   // no statute?
+    public List<String> getOfsChgStatuteAttributes(Charge cCharge) {
+        if (cCharge.statute == null)   // no statute?
             return null;
 
         // Create attribute holding list
-        List<String> lAttributes= new ArrayList<String>();
+        List<String> lAttributes = new ArrayList<String>();
 
         // Add prefixes to statuteNumber for all chargeAttributes sorted in ascending order (e.g. 664-182-SectionNbr)
         logger "Searching for charge statute attributes";
-        cCharge.chargeAttributes.sort().each{ ca ->	   // sort/load in ascending order
-            String sAttr= getLookupListCodeAttribute("CHARGE_ATTRIBUTES", ca, OFS_ATTRIBUTE_TYPE_, tylerCourtLocation, tylerCaseCategory, "filingCode", "US");
-            if( sAttr != null ) { // valid attr?
+        cCharge.chargeAttributes.sort().each { ca ->       // sort/load in ascending order
+            String sAttr = getLookupListCodeAttribute("CHARGE_ATTRIBUTES", ca, OFS_ATTRIBUTE_TYPE_, tylerCourtLocation, tylerCaseCategory, "filingCode", "US");
+            if (sAttr != null) { // valid attr?
                 lAttributes.add(sAttr);
             }
         }
@@ -1604,40 +1612,41 @@ public class CreateDefPtyReviewFilingInterface {
      * @param cDoc - Document containing file attachment
      * @returns xml file attachment elements if successful, else returns null if error.
      */
-    public StringBuilder getDocFileAttachment( Document cDoc, String sDocTypeId, String filingCodeRegisterAction ) {
+    public StringBuilder getDocFileAttachment(Document cDoc, String sDocTypeId, String filingCodeRegisterAction) {
         StringBuilder xFile = new StringBuilder();
         String sDocExactFilename = null;
         String sBase64EncodedDocFile = null;
 
         Set<String> sAllowableFilingExts = ['PDF'];
 
-        try{
+        try {
             // Load file attachment structure if valid file
-            if( cDoc != null ) {
+            if (cDoc != null) {
                 // Encode document file if available
                 //sBase64EncodedDocFile = base64EncodeDocFile(cDoc);
                 //sBase64EncodedDocFile = cDoc.file.bytes.encodeBase64().toString();
                 //sBase64EncodedDocFile = org.apache.commons.codec.binary.Base64.encodeBase64URLSafeString(cDoc.file.bytes);
                 logger("OFS_LOG encoding file start ${cDoc} ${Timestamp.valueOf(LocalDateTime.now())}");
-                sBase64EncodedDocFile = org.apache.commons.codec.binary.Base64.encodeBase64String(cDoc.file.bytes);  //this method was much faster
+                sBase64EncodedDocFile = org.apache.commons.codec.binary.Base64.encodeBase64String(cDoc.file.bytes);
+                //this method was much faster
                 logger("OFS_LOG encoding file end ${cDoc} ${Timestamp.valueOf(LocalDateTime.now())}");
                 //sBase64EncodedDocFile = org.apache.commons.codec.binary.Base64.encodeBase64(cDoc.file.bytes).toString();
                 //sBase64EncodedDocFile = org.codehaus.groovy.runtime.EncodingGroovyMethods.encodeBase64(cDoc.file.bytes).toString();
                 //sBase64EncodedDocFile = java.util.Base64.getEncoder().encodeToString(cDoc.file.bytes);
-                if (sBase64EncodedDocFile != null ) { // valid
+                if (sBase64EncodedDocFile != null) { // valid
                     sDocExactFilename = cDoc.getFile().name;    // get file+ext
 
                     // Test for valid file extension for attachment
-                    if( !StringUtil.isNullOrEmpty(sDocExactFilename) ) { // valid file?
+                    if (!StringUtil.isNullOrEmpty(sDocExactFilename)) { // valid file?
                         String sFileExt = FilenameUtils.getExtension(sDocExactFilename);
-                        if ( !sAllowableFilingExts.contains(sFileExt?.toUpperCase()) ) {
+                        if (!sAllowableFilingExts.contains(sFileExt?.toUpperCase())) {
                             this.aErrorList_.add(new ValidationError(true, cDoc.case.caseNumber, logger("Invalid [$sDocExactFilename] file, filing system only supports ${sAllowableFilingExts} types")));
                             return null;
                         }
                     }
 
                     // The RegisterActionDescriptionText (ie. docDef.number3) field is a required field
-                    if ( StringUtil.isNullOrEmpty(cDoc?.docDef?.number3) ) {
+                    if (StringUtil.isNullOrEmpty(cDoc?.docDef?.number3)) {
                         this.aErrorList_.add(new ValidationError(true, cDoc.case.caseNumber, logger("docDef.number3 required field is null on attached document")));
                         return null;
                     }
@@ -1662,7 +1671,7 @@ public class CreateDefPtyReviewFilingInterface {
         //xFile.append("<nc:BinaryBase64Object>${xmlStrUtil(sBase64EncodedDocFile)}</nc:BinaryBase64Object>");
         xFile.append("<nc:BinaryBase64Object></nc:BinaryBase64Object>");
         xFile.append("<nc:BinaryDescriptionText>${xmlStrUtil(sDocExactFilename)}</nc:BinaryDescriptionText>");
-        String codeBinaryFormatStandardName = com.sustain.rule.model.RuleDef.exec("INTERFACE_OFS_UPDATE_FILING_CODES_LOCAL_XML", null, ["lookuplist": "ODYSSEY_BINARY_FORMAT_STANDARD", "casecategory": "8", "name": "", "filingcodeid": filingCodeRegisterAction] ).getValue("code");
+        String codeBinaryFormatStandardName = com.sustain.rule.model.RuleDef.exec("INTERFACE_OFS_UPDATE_FILING_CODES_LOCAL_XML", null, ["lookuplist": "ODYSSEY_BINARY_FORMAT_STANDARD", "casecategory": "8", "name": "", "filingcodeid": filingCodeRegisterAction]).getValue("code");
         //codeBinaryFormatStandardName = codeBinaryFormatStandardName == null || codeBinaryFormatStandardName.isEmpty() ? xmlStrUtil(getLookupListCodeAttribute("ODYSSEY_BINARY_FORMAT_STANDARD", "CRIMINALDOCUMENT", OFS_ATTRIBUTE_TYPE_, tylerCourtLocation, tylerCaseCategory, "filingCode", "US")) : codeBinaryFormatStandardName;
         xFile.append("<nc:BinaryFormatStandardName>${codeBinaryFormatStandardName}</nc:BinaryFormatStandardName>");
         xFile.append("<nc:BinaryLocationURI>${xmlStrUtil(sDocExactFilename)}</nc:BinaryLocationURI>");
@@ -1683,8 +1692,8 @@ public class CreateDefPtyReviewFilingInterface {
      * @param cSubDoc - Submit filing doc
      * @Returns list of documents matching criteria, else null if error
      */
-    public List<Document> getAllConnectedDocFilings( Case cCase, Document cSubDoc ) {
-        if ( cCase == null || cSubDoc == null )
+    public List<Document> getAllConnectedDocFilings(Case cCase, Document cSubDoc) {
+        if (cCase == null || cSubDoc == null)
             return null;
 
         try {
@@ -1692,28 +1701,28 @@ public class CreateDefPtyReviewFilingInterface {
             logger("Searching case.caseCrossReferences for connecting Docs to attach w/ filing");
 
             // Search for connecting documents attached to initial filing document, search by Rid then by Lid if needed
-            boolean bLeadDocOnLid= false;
+            boolean bLeadDocOnLid = false;
             String sDocSrchFilterRid = "crossReferences[lid!=null and rid==#p1 and rentity!=null and type=='DOCREL']"
             String sDocSrchFilterLid = "crossReferences[lid==#p1  and rid!=null and rentity!=null and type=='DOCREL']"
-            List<CaseCrossReference> lCaseCrossRefs=cCase.collect(sDocSrchFilterRid,cSubDoc.id);
-            if( lCaseCrossRefs.empty ) { // search by lead doc on lid?
+            List<CaseCrossReference> lCaseCrossRefs = cCase.collect(sDocSrchFilterRid, cSubDoc.id);
+            if (lCaseCrossRefs.empty) { // search by lead doc on lid?
                 logger("CrossRef lead doc not found by Rid, searching by Lid");
-                lCaseCrossRefs=cCase.collect(sDocSrchFilterLid,cSubDoc.id);
-                bLeadDocOnLid= true; // search mode
+                lCaseCrossRefs = cCase.collect(sDocSrchFilterLid, cSubDoc.id);
+                bLeadDocOnLid = true; // search mode
             }
 
             // If lead document found on Lid use Rid for connecting document id and vise-versa
             lCaseCrossRefs.each { CaseCrossReference cr ->
-                Document cConnDoc = (bLeadDocOnLid)? Document.get(cr.rid): Document.get(cr.lid);
-                if( cConnDoc!=null ) {
+                Document cConnDoc = (bLeadDocOnLid) ? Document.get(cr.rid) : Document.get(cr.lid);
+                if (cConnDoc != null) {
                     lCDocs.add(cConnDoc);    // add doc to list
                     logger("Loading connecting document - [${cConnDoc?.docDef?.number4} | ${cConnDoc?.docDef?.name}]");
-                }else{
+                } else {
                     this.aErrorList_.add(new ValidationError(false, cCase.caseNumber, logger("Connecting DocId(${cr.rid}) not found in caseCrossReference})")));
                 }
             }
 
-            if ( lCDocs != null ) { // valid connecting docs available?
+            if (lCDocs != null) { // valid connecting docs available?
                 logger("Found ${lCDocs.size()} connecting Docs on party.subCase to attach");
                 return lCDocs;
             }
@@ -1729,14 +1738,14 @@ public class CreateDefPtyReviewFilingInterface {
      * @param fFile - File to encode
      * @Returns encoded base64 encoded string or null if error
      */
-    public String base64EncodeDocFile( Document cDoc ) {
-        if( cDoc == null ) return null;
+    public String base64EncodeDocFile(Document cDoc) {
+        if (cDoc == null) return null;
         try {
             // Attempt to load document file and add and return base64 string encoding
-            File fDoc= cDoc.getFile()	// get document file
-            if ( fDoc != null && fDoc.size() > 0 ) {	// valid file?
+            File fDoc = cDoc.getFile()    // get document file
+            if (fDoc != null && fDoc.size() > 0) {    // valid file?
                 logger("Applying base64 binary encoding on document $fDoc.name file");
-                return( fDoc.bytes.encodeBase64().toString() );
+                return (fDoc.bytes.encodeBase64().toString());
             } else
                 logger("No file attachment found");
 
@@ -1752,9 +1761,9 @@ public class CreateDefPtyReviewFilingInterface {
      * @param sDateTime - Date/Time string to convert to Date type
      * @param sDateFormat - Date format to use (eg. "yyyyMMddHHmm")
      * Returns - formatted String object
-     * ------------------------------------------------------------------------------------*/
+     * ------------------------------------------------------------------------------------ */
     public String convDateFmtToStr(Date dDateTime, String sFormat) {
-        if( dDateTime == null )    // empty?
+        if (dDateTime == null)    // empty?
             return null;
 
         // Convert dateTime string to selected date format
@@ -1780,11 +1789,11 @@ public class CreateDefPtyReviewFilingInterface {
      * Returns - returns combined time/date object, else null if error
      */
     public Date combineDateTime(Date date, Date time) {
-        if( date == null )
+        if (date == null)
             return null;
 
         // If no time is present, just return date
-        if( time == null )
+        if (time == null)
             return date;
 
         Calendar aDate = Calendar.getInstance();
@@ -1810,7 +1819,7 @@ public class CreateDefPtyReviewFilingInterface {
      * Returns - return ISO 8601 date string, Otherwise null
      */
     public String toISO8601UTC(Date date) {
-        if( date == null ) return null;
+        if (date == null) return null;
 
         TimeZone tz = TimeZone.getTimeZone("UTC");
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");
@@ -1823,26 +1832,26 @@ public class CreateDefPtyReviewFilingInterface {
      * @param sFtInStr Class:String Ft'In" formatted input string
      * @return converted string, else null if error
      */
-    public String convertFtInFmtToInches( String sFtInStr ) {
-        String sConv= null;
-        int iFt= 0, iIn= 0;
+    public String convertFtInFmtToInches(String sFtInStr) {
+        String sConv = null;
+        int iFt = 0, iIn = 0;
 
-        if( sFtInStr == null )	// invalid string?
+        if (sFtInStr == null)    // invalid string?
             return null;
 
         // Remove eCourt unrelated characters
-        sFtInStr= sFtInStr.replace("''","\""); // default to " to support '' or " inch mode
-        sFtInStr= sFtInStr.replace("_",""); // get rid of eSuite delimiter
+        sFtInStr = sFtInStr.replace("''", "\""); // default to " to support '' or " inch mode
+        sFtInStr = sFtInStr.replace("_", ""); // get rid of eSuite delimiter
 
         try {
             logger("Converting $sFtInStr to inches")
-            int iFtPos= sFtInStr.indexOf("'");	// get Ft position
-            if( iFtPos > 0 ) { // found?
-                iFt= sFtInStr.substring(0, iFtPos).toInteger();
-                int iInPos= sFtInStr.indexOf("\"");   // get In position
-                if( iInPos > 0 ) {  // found?
-                    iIn = sFtInStr.substring(iFtPos+1,iInPos).toInteger();
-                    sConv= ((iFt*12) + iIn).toString(); // convert to inches
+            int iFtPos = sFtInStr.indexOf("'");    // get Ft position
+            if (iFtPos > 0) { // found?
+                iFt = sFtInStr.substring(0, iFtPos).toInteger();
+                int iInPos = sFtInStr.indexOf("\"");   // get In position
+                if (iInPos > 0) {  // found?
+                    iIn = sFtInStr.substring(iFtPos + 1, iInPos).toInteger();
+                    sConv = ((iFt * 12) + iIn).toString(); // convert to inches
                     logger("Converted $sFtInStr to $sConv\"");
                 } else
                     logger("Invalid \" delimiter found - (FT'IN\")");
@@ -1881,11 +1890,11 @@ public class CreateDefPtyReviewFilingInterface {
         LookupList lLookupList = null;
 
         // validate source value
-        if( StringUtil.isNullOrEmpty(sSourceVal) )
+        if (StringUtil.isNullOrEmpty(sSourceVal))
             return null;
 
         // Load lookup list to use for field validation
-        if ( !StringUtil.isNullOrEmpty(sLookupList) )  // valid lookup?
+        if (!StringUtil.isNullOrEmpty(sLookupList))  // valid lookup?
             lLookupList = LookupList.get(sLookupList);  // load lookupList
         else
             return null;
@@ -1908,18 +1917,18 @@ public class CreateDefPtyReviewFilingInterface {
             // Search by attribute, if found, use name/code associated w/ value
             if (StringUtil.isNullOrEmpty(sRetVal) && (nValidateType & LListValType.attrib)) {
                 List<LookupAttribute> lAttrib = lLookupList.collect("items.attributes[value==#p1]", sSourceVal);
-                if ( !lAttrib.empty )  // valid?
+                if (!lAttrib.empty)  // valid?
                     sRetVal = lAttrib.last().getName();  // get name/code for value
             }
 
             // Search by internal map if code not found in previous search
-            if ( StringUtil.isNullOrEmpty(sRetVal) && mMapTranslation) {        // prev search failed w/ valid map?
+            if (StringUtil.isNullOrEmpty(sRetVal) && mMapTranslation) {        // prev search failed w/ valid map?
                 if (mMapTranslation.get(sSourceVal)) // in custom mapping?
                     sRetVal = mMapTranslation.get(sSourceVal);
             }
 
             // Use valid default if search failed
-            if ( StringUtil.isNullOrEmpty(sRetVal) && !StringUtil.isNullOrEmpty(sDefault) )  // use default?
+            if (StringUtil.isNullOrEmpty(sRetVal) && !StringUtil.isNullOrEmpty(sDefault))  // use default?
                 sRetVal = sDefault;
         } else {
             logger(" Lookuplist[$sLookupList] invalid");
@@ -1934,7 +1943,7 @@ public class CreateDefPtyReviewFilingInterface {
      * @param fFilePath - Processed file
      * @return 0= failure, 1= successful
      */
-    public boolean processErrors( ) {
+    public boolean processErrors() {
         try {
             logger("Processing validation error(s)");
 
@@ -1944,14 +1953,14 @@ public class CreateDefPtyReviewFilingInterface {
 
             // Log all errors
             aErrorList_.findAll { e -> !e.bProcessed_ }.each { ValidationError e ->
-                if ( iValErrs == 0 ) {  // new entry?
+                if (iValErrs == 0) {  // new entry?
                     logger "Adding $iErrCount tracking/detail error(s)"
                     logger e.outputTextErrorHeader();
                 }
 
                 // Create error memo for court assignment based on what's available
                 StringJoiner sMemo = new StringJoiner(" | ");
-                if (e.bReject_)	// rejected?
+                if (e.bReject_)    // rejected?
                     sMemo.add("<b>${iTracking_.INTERFACE_TYPE_} Failed</b>");
                 else
                     sMemo.add("<b>${iTracking_.INTERFACE_TYPE_} Warning</b>");
@@ -1961,11 +1970,11 @@ public class CreateDefPtyReviewFilingInterface {
 
                 // Configure eSuite assignment error type if set
                 String sType = iTracking_.TRACKING_DETAIL_INT_REVIEWERR_;  // review error assignment
-                if (e.bReject_)	// rejected?
+                if (e.bReject_)    // rejected?
                     sType = iTracking_.TRACKING_DETAIL_INT_REJECTERR_;     // reject error assignment
 
                 // Add tracking detail message to trigger assignment queues if needed
-                iTracking_.addTrackingDetail(sType, iTracking_.TRACKING_STATUS_ERROR_, "Validation error", sMemo.toString() );
+                iTracking_.addTrackingDetail(sType, iTracking_.TRACKING_STATUS_ERROR_, "Validation error", sMemo.toString());
 
                 // Update console output
                 logger(iValErrs + 1 + ") " + sMemo);
@@ -1975,7 +1984,7 @@ public class CreateDefPtyReviewFilingInterface {
             }
 
             // Check error batch for reject
-            if( (aErrorList_.findAll { e -> e.bReject_ }.size() > 0) )
+            if ((aErrorList_.findAll { e -> e.bReject_ }.size() > 0))
                 iTracking_.updateResult(iTracking_.RESULT_FAIL_OFS_FAILED_);
 
             return true;
@@ -1997,35 +2006,36 @@ public class CreateDefPtyReviewFilingInterface {
         processErrors();
 
         // Set tracking result based on script execution
-        if ( iTracking_.tracking_.result != iTracking_.RESULT_START_ ) {  // tracking error reported?
+        if (iTracking_.tracking_.result != iTracking_.RESULT_START_) {  // tracking error reported?
             sendEmail();    // send email report for exception/reject errors
         } else {    // success
             iTracking_.updateResult(iTracking_.RESULT_SUCCESS_);
 
             // If Debug mode send script trace on success
-            if( bDebug_ )   // debug?
+            if (bDebug_)   // debug?
                 sendEmail();
         }
 
         // Set DEF party document status based on filing condition
-        if( !this.bReviewFilingSent_ ) // not sent?
-            updateDocumentStatus(cParty_, (String)mDocStatus_.ofsSubmit, (String)mDocStatus_.ofsFailed); // update document status
+        if (!this.bReviewFilingSent_) // not sent?
+            updateDocumentStatus(cParty_, (String) mDocStatus_.ofsSubmit, (String) mDocStatus_.ofsFailed);
+        // update document status
 
         // Add interface result trace to tracking object
-        iTracking_.addTrackingDetail(iTracking_.TRACKING_DETAIL_INT_LOG_, iTracking_.TRACKING_STATUS_END_,"${iTracking_.INTERFACE_} Log", "Interface results = ${iTracking_.tracking_.result}", sLoggerOutputBuf_.toString());
+        iTracking_.addTrackingDetail(iTracking_.TRACKING_DETAIL_INT_LOG_, iTracking_.TRACKING_STATUS_END_, "${iTracking_.INTERFACE_} Log", "Interface results = ${iTracking_.tracking_.result}", sLoggerOutputBuf_.toString());
     }
 
     /** ------------------------------------------------------------------------------------
      *  Send Email to distribution list.
      */
     public void sendEmail() {
-        if ( !this.cRule_.mailManager.isMailActive() || iTracking_ == null ) {
+        if (!this.cRule_.mailManager.isMailActive() || iTracking_ == null) {
             logger("eMail service is disabled");
             return;
         }
 
         StringBuilder body = new StringBuilder();
-        String subject = "$iTracking_.INTERFACE_ BR " + ((bDebug_)?'Debug':'Error');
+        String subject = "$iTracking_.INTERFACE_ BR " + ((bDebug_) ? 'Debug' : 'Error');
         SimpleDateFormat dt = new SimpleDateFormat("yyyy.MM.dd hh:mm:ss");
 
         try {
@@ -2038,7 +2048,7 @@ public class CreateDefPtyReviewFilingInterface {
             body.append("---------------------------------------------------------<br>");
             body.append("Execution date: ");
             body.append(dt.format(dExecDate_) + "<br>");
-            if( !StringUtil.isNullOrEmpty(iTracking_.tracking_.caseNumber) )
+            if (!StringUtil.isNullOrEmpty(iTracking_.tracking_.caseNumber))
                 body.append("Case#: ${iTracking_.tracking_.caseNumber}<br>");
             body.append("<br>");
 
@@ -2046,7 +2056,7 @@ public class CreateDefPtyReviewFilingInterface {
             body.append("---------------------------------------------------------<br>");
             body.append("Tracking Id: ${iTracking_.getID()}<br>");
             body.append("Result: ${iTracking_.tracking_.result}<br>");
-            if( !StringUtil.isNullOrEmpty(iTracking_.tracking_.exception) )
+            if (!StringUtil.isNullOrEmpty(iTracking_.tracking_.exception))
                 body.append("Exception: ${iTracking_.tracking_.exception}<br>");
             body.append("<br>");
 
@@ -2055,7 +2065,7 @@ public class CreateDefPtyReviewFilingInterface {
             body.append(sLoggerOutputBuf_.toString());
 
             // Dispatch emails to email support group
-            if( cSysProps_.sEmailList_ != null ) { // valid emails?
+            if (cSysProps_.sEmailList_ != null) { // valid emails?
                 String[] tokens = cSysProps_.sEmailList_.split(',');  // split out emails by ','
                 for (String sEmail : tokens) {           // dispatch to all emails
                     logger("Sending error report to $sEmail");
@@ -2071,8 +2081,8 @@ public class CreateDefPtyReviewFilingInterface {
 
     /** ------------------------------------------------------------------------------------
      *  Debug console output/logger
-     *  @param sBuf Class:String - input string buffer
-     *  @returns input buffer
+     * @param sBuf Class:String - input string buffer
+     * @returns input buffer
      */
     public String logger(String sBuf) {
         sLoggerOutputBuf_.append(sBuf + "<br>");
@@ -2085,36 +2095,36 @@ public class CreateDefPtyReviewFilingInterface {
  * eSuite validation class method
  */
 class ValidationError {
-    boolean bReject_= false;      // reject process
+    boolean bReject_ = false;      // reject process
     String sFilename_ = "";       // filename
     String sCaseNum_ = "";        // case number
     String sDesc_ = "";           // error description
-    Date   dDate_;                // date/time of error
-    int    nType_ = 0;            // routing type for workflow queue assignment
-    boolean bProcessed_= false;   // processed flag
+    Date dDate_;                // date/time of error
+    int nType_ = 0;            // routing type for workflow queue assignment
+    boolean bProcessed_ = false;   // processed flag
 
     // Constructor
-    ValidationError( boolean bReject_, String sCaseNum, String sDesc, int nType=0) {
-        this.bReject_= bReject_;
-        this.sCaseNum_= sCaseNum;
+    ValidationError(boolean bReject_, String sCaseNum, String sDesc, int nType = 0) {
+        this.bReject_ = bReject_;
+        this.sCaseNum_ = sCaseNum;
         this.sDesc_ = sDesc;
         this.nType_ = nType;
         this.dDate_ = new Date();    // get current date and time
     }
 
     // Constructor
-    ValidationError( boolean bReject_, String sDesc, int nType=0) {
-        this.bReject_= bReject_;
+    ValidationError(boolean bReject_, String sDesc, int nType = 0) {
+        this.bReject_ = bReject_;
         this.sDesc_ = sDesc;
         this.nType_ = nType;
         this.dDate_ = new Date();   // get current date and time
     }
 
     // Constructor
-    ValidationError( boolean bReject_, String sCaseNum, String sFilename, String sDesc, int nType=0) {
-        this.bReject_= bReject_;
-        this.sCaseNum_= sCaseNum;
-        this.sFilename_= sFilename_;
+    ValidationError(boolean bReject_, String sCaseNum, String sFilename, String sDesc, int nType = 0) {
+        this.bReject_ = bReject_;
+        this.sCaseNum_ = sCaseNum;
+        this.sFilename_ = sFilename_;
         this.sDesc_ = sDesc;
         this.nType_ = nType;
         this.dDate_ = new Date();   // get current date and time
@@ -2143,12 +2153,12 @@ class ChargeStatuteObj {
     String sStatuteSectionName_;
     List<String> lsStatuteAttributeLst_ = null;
 
-    ChargeStatuteObj( String sChargeID, String sStatuteSectionNumber, String sStatuteSectionName, List<String> lsStatuteAttributeLst=null ) {
+    ChargeStatuteObj(String sChargeID, String sStatuteSectionNumber, String sStatuteSectionName, List<String> lsStatuteAttributeLst = null) {
         sChargeID_ = sChargeID;
         sStatuteSectionNumber_ = sStatuteSectionNumber;
         sStatuteSectionName_ = sStatuteSectionName;
-        if( lsStatuteAttributeLst != null )
-            lsStatuteAttributeLst_= lsStatuteAttributeLst;
+        if (lsStatuteAttributeLst != null)
+            lsStatuteAttributeLst_ = lsStatuteAttributeLst;
     }
 }
 
@@ -2162,25 +2172,25 @@ class SmbFileWrapper {
     public SmbFile cSmbFile_;
 
     // Constructor
-    SmbFileWrapper(){}
+    SmbFileWrapper() {}
 
     // Constructor @Overloaded
-    SmbFileWrapper( String sSmbURL, String sUsername, String sPassword, String sDomain ) {
-        setAuth( sUsername, sPassword, sDomain );
+    SmbFileWrapper(String sSmbURL, String sUsername, String sPassword, String sDomain) {
+        setAuth(sUsername, sPassword, sDomain);
         smbFile(sSmbURL);
     }
 
     // Constructor @Overloaded
-    SmbFileWrapper( String sUsername, String sPassword, String sDomain = "" ) {
-        setAuth( sUsername, sPassword, sDomain );
+    SmbFileWrapper(String sUsername, String sPassword, String sDomain = "") {
+        setAuth(sUsername, sPassword, sDomain);
     }
 
     // Set network authentication
-    public void setAuth( String sUsername, String sPassword, String sDomain = "" ) {
+    public void setAuth(String sUsername, String sPassword, String sDomain = "") {
         try {
             this.cSmbNtlmCreds_ = new NtlmPasswordAuthentication(sDomain, sUsername, sPassword);
         } catch (Exception ex) {
-            throw new Exception("Exception::setAuth - network credential error, check username/password" + ex.message );
+            throw new Exception("Exception::setAuth - network credential error, check username/password" + ex.message);
         }
     }
 
@@ -2207,20 +2217,21 @@ class SmbFileWrapper {
 
     // Build/Validate smbFile network URL
     // Returns formatted server path
-    public String toSmbURL( String sSmbURL ) {
-        if( !StringUtil.isNullOrEmpty(sSmbURL) ) {  // valid path?
+    public String toSmbURL(String sSmbURL) {
+        if (!StringUtil.isNullOrEmpty(sSmbURL)) {  // valid path?
 
             // SMB paths require Unix style path separators '/', so convert server path if needed
-            if( sSmbURL.startsWith("//") )
+            if (sSmbURL.startsWith("//"))
                 sSmbURL = "smb:" + sSmbURL;
-            else if ( !sSmbURL.toUpperCase().startsWith("SMB://") ) {
+            else if (!sSmbURL.toUpperCase().startsWith("SMB://")) {
                 sSmbURL = sSmbURL.replaceAll("^/*", "").replaceAll("^\\\\*", "");
                 sSmbURL = "smb://" + sSmbURL;
             }
             sSmbURL = sSmbURL.replace('\\', '/');
 
             // SMB workgroups, servers, shares, or directories require a trailing slash '/' if a directory path
-            if ( StringUtil.isNullOrEmpty(FilenameUtils.getExtension(sSmbURL))) { // represents directory path w/ no file?
+            if (StringUtil.isNullOrEmpty(FilenameUtils.getExtension(sSmbURL))) {
+                // represents directory path w/ no file?
                 if (!sSmbURL.endsWith("/"))
                     sSmbURL += '/';
             }
@@ -2237,19 +2248,19 @@ class SmbFileWrapper {
     // Create/Connect smbFile object to network URL
     // Returns true if successful connection or false/exception if error
     public boolean smbFile(String sSmbURL, boolean bMkDirPaths = false) {
-        if( cSmbNtlmCreds_ == null || StringUtil.isNullOrEmpty(sSmbURL) )
+        if (cSmbNtlmCreds_ == null || StringUtil.isNullOrEmpty(sSmbURL))
             throw new Exception("Exception::createFileDirs - NtlmNetworkAuth=null or SmbURL($sSmbURL)=null");
 
         // Create new SMB network file object
         try {
-            this.sSmbURL_= toSmbURL(sSmbURL);
+            this.sSmbURL_ = toSmbURL(sSmbURL);
             this.cSmbFile_ = new SmbFile(this.sSmbURL_, cSmbNtlmCreds_);
         } catch (Exception ex) {
-            throw new Exception("Exception::smbFile - Error creating network SmbFile instance " + ex.message );
+            throw new Exception("Exception::smbFile - Error creating network SmbFile instance " + ex.message);
         }
 
         // Make server paths if required
-        if( bMkDirPaths )
+        if (bMkDirPaths)
             mkDirs();
 
         return isConnected();
@@ -2264,18 +2275,18 @@ class SmbFileWrapper {
     // Create smbFile directories @Overloaded
     // Returns exception if error
     public mkDirs() {
-        mkDirs( this.sSmbURL_ );
+        mkDirs(this.sSmbURL_);
     }
 
     // Create smbFile directories.
     // Returns exception if error
-    public mkDirs( String sToSmbURL ) {
-        if( this.cSmbNtlmCreds_ == null || StringUtil.isNullOrEmpty(sToSmbURL) )
+    public mkDirs(String sToSmbURL) {
+        if (this.cSmbNtlmCreds_ == null || StringUtil.isNullOrEmpty(sToSmbURL))
             throw new Exception("Exception::createFileDirs - NtlmNetworkAuth=null or sToSmbURL($sToSmbURL)=null");
 
         // Extract path if filename attached, if not ignore
-        sToSmbURL= this.toSmbURL(sToSmbURL); // convert to smb
-        if( !StringUtil.isNullOrEmpty(FilenameUtils.getExtension(sToSmbURL)) ) { // filename?
+        sToSmbURL = this.toSmbURL(sToSmbURL); // convert to smb
+        if (!StringUtil.isNullOrEmpty(FilenameUtils.getExtension(sToSmbURL))) { // filename?
             sToSmbURL = FilenameUtils.getPath(sToSmbURL); // get rid of filename
         }
 
@@ -2285,27 +2296,27 @@ class SmbFileWrapper {
             if (!cSmbFile.exists())
                 cSmbFile.mkdirs();
         } catch (Exception ex) {
-            throw new Exception("Exception::mkDirs - error creating file directories " + ex.message );
+            throw new Exception("Exception::mkDirs - error creating file directories " + ex.message);
         }
     }
 
     // Get smbFile into byte array. Use object credentials
     // Returns file byte array or null/exception if error
-    public byte[] getFile( String sFromSmbURL ) {
+    public byte[] getFile(String sFromSmbURL) {
         byte[] fisBytes;
-        if( this.cSmbNtlmCreds_ == null || StringUtil.isNullOrEmpty(sFromSmbURL) )
+        if (this.cSmbNtlmCreds_ == null || StringUtil.isNullOrEmpty(sFromSmbURL))
             throw new Exception("Exception::getFile - NtlmNetworkAuth=null or sFromSmbURL($sFromSmbURL)=null");
 
         // Read network file into file byte stream
-        SmbFile cSmbFile = new SmbFile(sFromSmbURL,this.cSmbNtlmCreds_);
-        fisBytes = new byte[(int)cSmbFile.length()]; // allocate byte[] for storage
+        SmbFile cSmbFile = new SmbFile(sFromSmbURL, this.cSmbNtlmCreds_);
+        fisBytes = new byte[(int) cSmbFile.length()]; // allocate byte[] for storage
         SmbFileInputStream fis = new SmbFileInputStream(cSmbFile);
-        try{
+        try {
             fis.read(fisBytes); // read in file
         } catch (SmbException ex) {
             throw new Exception("Exception::getFile - error reading ${cSmbFile.getPath()} file" + ex.message)
         } finally {
-            if( fis )
+            if (fis)
                 fis.close();
         }
         return fisBytes;
@@ -2313,21 +2324,21 @@ class SmbFileWrapper {
 
     // Put smbFile to destination smbURL. Use object credentials
     // Returns true if successful or false/esception if error
-    public boolean putFile( String sData, String sToSmbURL, boolean bisAppend=false ) {
-        boolean bRetVal= false;
-        if( this.cSmbNtlmCreds_ == null || StringUtil.isNullOrEmpty(sToSmbURL) )
+    public boolean putFile(String sData, String sToSmbURL, boolean bisAppend = false) {
+        boolean bRetVal = false;
+        if (this.cSmbNtlmCreds_ == null || StringUtil.isNullOrEmpty(sToSmbURL))
             throw new Exception("Exception::putFile - NtlmNetworkAuth=null or sToSmbURL($sToSmbURL)=null");
 
         // Write smb network file
-        SmbFile cSmbFile = new SmbFile(sToSmbURL,this.cSmbNtlmCreds_);
-        SmbFileOutputStream fos = new SmbFileOutputStream(cSmbFile,bisAppend);
-        try{
+        SmbFile cSmbFile = new SmbFile(sToSmbURL, this.cSmbNtlmCreds_);
+        SmbFileOutputStream fos = new SmbFileOutputStream(cSmbFile, bisAppend);
+        try {
             fos.write(sData.getBytes()); // write file
-            bRetVal= true;
+            bRetVal = true;
         } catch (SmbException ex) {
             throw new Exception("Exception::putFile - error writing ${cSmbFile.getPath()} file" + ex.message)
         } finally {
-            if( fos )
+            if (fos)
                 fos.close();
         }
         return bRetVal;
@@ -2354,7 +2365,7 @@ class SmbFileWrapper {
             SmbFile fToSmbPath = new SmbFile(this.toSmbURL(sToSmbPath) + fFromSmbPath.getName(), this.cSmbNtlmCreds_);
 
             // Delete destination file if exists
-            if ( fToSmbPath.isFile() ) // yes?
+            if (fToSmbPath.isFile()) // yes?
                 fToSmbPath.delete();
 
             // Move/Rename the network file
@@ -2362,7 +2373,7 @@ class SmbFileWrapper {
             bRetVal = true;
 
         } catch (Exception ex) {
-            throw new Exception("Exception::moveTo - file move error - " + ex.message );
+            throw new Exception("Exception::moveTo - file move error - " + ex.message);
         }
         return bRetVal;
     }
