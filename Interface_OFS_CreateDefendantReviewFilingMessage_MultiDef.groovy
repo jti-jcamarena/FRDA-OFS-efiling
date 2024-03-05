@@ -1,6 +1,6 @@
 /** ------------------------------------------------------------------------------------------------------------------
  * Odyssey File and Serve (OFS) defendant party reviewFiling interface - City of Fresno, CA
- * last updated 11/20/2023 by JCamarena
+ * last updated 3/5/2024 by JCamarena
  * V1.0 by R.Short / Bit Link Solutions on 8/07/2019
  * . Initial release
  *
@@ -494,7 +494,6 @@ public class CreateDefPtyReviewFilingInterface {
 
             logger("TEST:438:cOldCaseFiling:${cOldCaseFiling}; ${cOldCaseFiling?.number};cOldCaseFilingNFY:${cOldCaseFilingNFY} ${cOldCaseFilingNFY?.number}");
 
-            cOldCaseFiling = null;
 
             eProsCfg_.sCaseNumber_ = cOldCaseFiling?.number;
             logger("435:eProsCfg_.sCaseNumber_:${eProsCfg_.sCaseNumber_};cOldCaseFiling:${cOldCaseFiling?.number}");
@@ -945,7 +944,7 @@ public class CreateDefPtyReviewFilingInterface {
                         if (c.statute != null) {
                             RichList statuteLanguageChoices;
                             if (!c.collect("chargeAttributes").isEmpty()) {
-                                statuteLanguageChoices = c.statute.collect("statuteLanguageChoices[odysseyAttributes == #p1]", c.collect("chargeAttributes")?.first());
+                                statuteLanguageChoices = c.statute.collect("statuteLanguageChoices[odysseyAttributes == #p1 && odysseyFilingType == #p2]", c.collect("chargeAttributes")?.find({it -> it != null}), "OUTBOUND");
                             }
                             OFS_CaseXml.append('<cext:ChargeStatute>');
 
